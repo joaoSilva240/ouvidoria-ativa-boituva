@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { User, Megaphone, Building2, MapPin, Send, Laptop, Phone, Mail, Globe } from "lucide-react";
 import { useManifestacao } from "@/contexts/ManifestacaoContext";
+import { saveManifestacao } from "@/app/actions/manifestacao";
 import { motion } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { useRouter } from "next/navigation";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -15,6 +17,25 @@ function cn(...inputs: ClassValue[]) {
 export default function FinalizarPage() {
     const { data } = useManifestacao();
     const [agreed, setAgreed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+    const handleSend = async () => {
+        if (!agreed) return;
+        setLoading(true);
+
+        const result = await saveManifestacao(data);
+
+        setLoading(false);
+
+        if (result.success) {
+            alert(`Manifestação enviada com sucesso! Protocolo: ${result.protocolo}`);
+            // Redirecionar para página de sucesso ou limpar (em breve criar tela de sucesso)
+            // router.push(/sucesso?protocolo=${result.protocolo})
+        } else {
+            alert(`Erro: ${result.error}`);
+        }
+    };
 
     const getCategoryDetails = (id: string | null) => {
         const categories = {
@@ -122,10 +143,12 @@ export default function FinalizarPage() {
 
                 <motion.button
                     whileTap={{ scale: 0.95 }}
-                    className="w-full max-w-3xl h-28 bg-primary text-white rounded-[32px] text-4xl font-bold flex items-center justify-center gap-4 shadow-2xl shadow-primary/30 transition-all hover:brightness-105"
+                    onClick={handleSend}
+                    disabled={!agreed || loading}
+                    className="w-full max-w-3xl h-28 bg-primary text-white rounded-[32px] text-4xl font-bold flex items-center justify-center gap-4 shadow-2xl shadow-primary/30 transition-all hover:brightness-105 disabled:opacity-50 disabled:grayscale"
                 >
-                    ENVIAR MANIFESTAÇÃO
-                    <Send className="w-10 h-10" />
+                    {loading ? "ENVIANDO..." : "ENVIAR MANIFESTAÇÃO"}
+                    {!loading && <Send className="w-10 h-10" />}
                 </motion.button>
 
                 <label className="flex items-start gap-6 max-w-3xl bg-primary/5 p-8 rounded-[32px] border border-primary/10 cursor-pointer transition-colors hover:bg-primary/10">
