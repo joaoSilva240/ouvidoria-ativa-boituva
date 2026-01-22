@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { Plus, Search } from "lucide-react";
+import Image from "next/image";
 
 import { ActionCard } from "@/components/ActionCard";
-import { SentimentWidget } from "@/components/SentimentWidget";
 
 export default function LandingPage() {
     return (
@@ -13,8 +13,15 @@ export default function LandingPage() {
             {/* Header Section */}
             <header className="flex flex-col items-center gap-6">
                 <div className="flex flex-col items-center">
-                    <h1 className="text-5xl font-bold text-grafite tracking-tighter">Boituva</h1>
-                    <p className="text-grafite/50 text-sm font-semibold tracking-[0.3em] ml-1">OUVIDORIA DIGITAL</p>
+                    <Image
+                        src="/logo-boituva.png"
+                        alt="Boituva - Construindo progresso de mãos dadas"
+                        width={400}
+                        height={120}
+                        priority
+                        className="h-24 w-auto mb-2"
+                    />
+                    <p className="text-grafite/50 text-sm font-semibold tracking-[0.3em]">OUVIDORIA DIGITAL</p>
                 </div>
                 <h2 className="text-3xl font-bold text-grafite mt-2">Olá! Como podemos ajudar hoje?</h2>
             </header>
@@ -29,17 +36,14 @@ export default function LandingPage() {
                         variant="primary"
                     />
                 </Link>
-                <ActionCard
-                    title="Consultar Manifestação"
-                    subtitle="Acompanhe o status do seu pedido"
-                    icon={Search}
-                    variant="grafite"
-                />
-            </section>
-
-            {/* Sentiment Widget Section */}
-            <section className="w-full flex justify-center">
-                <SentimentWidget />
+                <Link href="/consulta" className="w-full max-w-2xl">
+                    <ActionCard
+                        title="Consultar Manifestação"
+                        subtitle="Acompanhe o status do seu pedido"
+                        icon={Search}
+                        variant="grafite"
+                    />
+                </Link>
             </section>
 
             {/* Footer Section */}

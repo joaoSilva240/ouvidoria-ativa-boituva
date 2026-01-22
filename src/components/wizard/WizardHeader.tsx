@@ -2,15 +2,22 @@
 
 import { ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export function WizardHeader() {
     const router = useRouter();
 
     return (
         <header className="w-full flex justify-between items-center py-6 px-12 bg-white/50 backdrop-blur-sm border-b border-slate-100">
-            <div className="flex flex-col items-start leading-tight">
-                <h1 className="text-2xl font-bold text-grafite tracking-tighter">Boituva</h1>
-                <p className="text-grafite/40 text-xs font-semibold tracking-widest uppercase">Ouvidoria Digital</p>
+            <div className="flex items-center">
+                <Image
+                    src="/logo-boituva.png"
+                    alt="Boituva - Construindo progresso de mãos dadas"
+                    width={200}
+                    height={60}
+                    priority
+                    className="h-12 w-auto"
+                />
             </div>
 
             <button

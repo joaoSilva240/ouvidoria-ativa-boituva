@@ -6,16 +6,18 @@ import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { saveManifestacao } from "@/app/actions/manifestacao";
 import { motion } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
+import { SentimentWidget } from "@/components/SentimentWidget";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
 export default function FinalizarPage() {
-    const { data } = useManifestacao();
+    const { data, setHumor } = useManifestacao();
     const [agreed, setAgreed] = useState(false);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
@@ -164,17 +166,22 @@ export default function FinalizarPage() {
                 </label>
             </div>
 
+            {/* Sentiment Widget */}
+            <div className="w-full flex justify-center mb-12">
+                <SentimentWidget value={data.humor} onChange={setHumor} />
+            </div>
+
             {/* Rodapé Institucional */}
             <footer className="w-full bg-white rounded-[40px] shadow-sm p-16 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-16">
                 <div className="flex flex-col gap-6">
                     <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                            {/* Brasão Simplificado */}
-                            <Building2 className="w-8 h-8 text-grafite" />
-                        </div>
-                        <div className="flex flex-col leading-none">
-                            <span className="text-2xl font-bold text-grafite">Prefeitura de Boituva</span>
-                        </div>
+                        <Image
+                            src="/logo-boituva.png"
+                            alt="Boituva - Construindo progresso de mãos dadas"
+                            width={180}
+                            height={54}
+                            className="h-14 w-auto"
+                        />
                     </div>
                     <p className="text-slate-400 text-lg font-medium leading-tight">
                         Construindo progresso de mãos dadas.
