@@ -5,6 +5,7 @@ import { User, EyeOff, Mail, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { FormInput } from "@/components/wizard/FormInput";
+import { useRouter } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,6 +15,7 @@ function cn(...inputs: ClassValue[]) {
 
 export default function IdentificacaoPage() {
     const [mode, setMode] = useState<"identificado" | "anonimo">("identificado");
+    const router = useRouter();
 
     return (
         <div className="flex flex-col items-center max-w-5xl mx-auto">
@@ -112,6 +114,7 @@ export default function IdentificacaoPage() {
 
                 <motion.button
                     whileTap={{ scale: 0.98 }}
+                    onClick={() => router.push("/registro/categoria")}
                     className="w-full h-20 bg-primary text-white rounded-[24px] text-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/20 mt-4 transition-transform hover:brightness-105"
                 >
                     Continuar
