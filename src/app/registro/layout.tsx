@@ -1,4 +1,5 @@
 import { WizardHeader } from "@/components/wizard/WizardHeader";
+import { ManifestacaoProvider } from "@/contexts/ManifestacaoContext";
 
 export default function WizardLayout({
     children,
@@ -6,11 +7,13 @@ export default function WizardLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-slate-50">
-            <WizardHeader />
-            <main className="container mx-auto px-4 py-8">
-                {children}
-            </main>
-        </div>
+        <ManifestacaoProvider>
+            <div className="min-h-screen bg-slate-50">
+                <WizardHeader />
+                <main className="container mx-auto px-4 py-8">
+                    {children}
+                </main>
+            </div>
+        </ManifestacaoProvider>
     );
 }

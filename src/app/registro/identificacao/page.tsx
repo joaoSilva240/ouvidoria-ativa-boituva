@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { FormInput } from "@/components/wizard/FormInput";
 import { useRouter } from "next/navigation";
+import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -14,8 +15,16 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function IdentificacaoPage() {
-    const [mode, setMode] = useState<"identificado" | "anonimo">("identificado");
+    const { data, setIdentificacao } = useManifestacao();
+    const [mode, setMode] = useState<"identificado" | "anonimo">(data.identificacao.mode);
+    const [nome, setNome] = useState(data.identificacao.nome);
+    const [contato, setContato] = useState(data.identificacao.contato);
     const router = useRouter();
+
+    const handleContinue = () => {
+        setIdentificacao({ mode, nome: mode === 'identificado' ? nome : '', contato: mode === 'identificado' ? contato : '' });
+        router.push("/registro/categoria");
+    };
 
     return (
         <div className="flex flex-col items-center max-w-5xl mx-auto">
@@ -89,12 +98,16 @@ export default function IdentificacaoPage() {
                                 label="Nome Completo"
                                 placeholder="Toque para digitar seu nome"
                                 icon={User}
+                                value={nome}
+                                onChange={(e) => setNome(e.target.value)}
                             />
                             <FormInput
                                 label="E-mail ou Telefone"
                                 placeholder="exemplo@email.com ou (15) 99999-9999"
                                 icon={Mail}
                                 className="bg-slate-50/50"
+                                value={contato}
+                                onChange={(e) => setContato(e.target.value)}
                             />
                         </motion.div>
                     ) : (
@@ -114,7 +127,7 @@ export default function IdentificacaoPage() {
 
                 <motion.button
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => router.push("/registro/categoria")}
+                    onClick={handleContinue}
                     className="w-full h-20 bg-primary text-white rounded-[24px] text-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/20 mt-4 transition-transform hover:brightness-105"
                 >
                     Continuar

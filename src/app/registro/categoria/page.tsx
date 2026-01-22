@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { CategoryCard } from "@/components/wizard/CategoryCard";
 import { useRouter } from "next/navigation";
+import { useManifestacao } from "@/contexts/ManifestacaoContext";
 
 const categories = [
     { id: "elogio", label: "Elogio", icon: ThumbsUp, color: "#10B981" }, // Verde Natureza
@@ -16,8 +17,16 @@ const categories = [
 ];
 
 export default function CategoriaPage() {
-    const [selected, setSelected] = useState<string | null>(null);
+    const { data, setCategoria } = useManifestacao();
+    const [selected, setSelected] = useState<string | null>(data.categoria);
     const router = useRouter();
+
+    const handleContinue = () => {
+        if (selected) {
+            setCategoria(selected);
+            router.push("/registro/relato");
+        }
+    };
 
     return (
         <div className="flex flex-col items-center max-w-6xl mx-auto pb-20">
@@ -62,7 +71,7 @@ export default function CategoriaPage() {
             <motion.button
                 whileTap={{ scale: 0.98 }}
                 disabled={!selected}
-                onClick={() => router.push("/registro/relato")}
+                onClick={handleContinue}
                 className="w-full h-24 bg-primary text-white rounded-[24px] text-3xl font-bold flex items-center justify-center gap-4 shadow-xl shadow-primary/20 disabled:opacity-50 disabled:grayscale transition-all"
             >
                 CONTINUAR

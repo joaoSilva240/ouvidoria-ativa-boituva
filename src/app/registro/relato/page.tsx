@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, X, Info } from "lucide-react";
+import { ArrowRight, X, Info, Building2, MapPin } from "lucide-react";
 import { motion } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
+import { FormSelect } from "@/components/wizard/FormSelect";
+import { FormInput } from "@/components/wizard/FormInput";
 import { useRouter } from "next/navigation";
+import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -12,9 +15,40 @@ function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+const secretariats = [
+    "Administração e Equipamentos Públicos",
+    "Assistência Social, Cidadania e Inclusão",
+    "Assuntos Jurídicos",
+    "Chefia de Gabinete",
+    "Comunicação",
+    "Cultura e Economia Criativa",
+    "Educação",
+    "Esportes",
+    "Fazenda, Desenvolvimento Econômico e Finanças",
+    "Governo e Planejamento Estratégico",
+    "Meio Ambiente, Parques e Bem-Estar Animal",
+    "Obras Públicas",
+    "Planejamento Urbano e Habitação",
+    "Saúde",
+    "Segurança Pública",
+    "Serviços",
+    "Trânsito e Mobilidade Urbana",
+    "Turismo, Juventude e Empreendedorismo"
+];
+
 export default function RelatoPage() {
-    const [text, setText] = useState("");
+    const { data, setRelato, setSecretaria, setEndereco } = useManifestacao();
+    const [text, setText] = useState(data.relato);
+    const [secretaria, setSecretariaState] = useState(data.secretaria);
+    const [endereco, setEnderecoState] = useState(data.endereco);
     const router = useRouter();
+
+    const handleContinue = () => {
+        setRelato(text);
+        setSecretaria(secretaria);
+        setEndereco(endereco);
+        router.push("/registro/finalizar");
+    };
 
     return (
         <div className="flex flex-col items-center max-w-6xl mx-auto pb-32">
@@ -22,12 +56,35 @@ export default function RelatoPage() {
 
             <header className="text-center mb-10">
                 <h2 className="text-5xl font-bold text-grafite mb-4 tracking-tight">
-                    O que aconteceu?
+                    Detalhes da Manifestação
                 </h2>
                 <p className="text-2xl text-grafite/60 font-medium max-w-3xl mx-auto leading-relaxed">
-                    Toque na área abaixo para descrever sua manifestação. Seja detalhado para nos ajudar a resolver o problema.
+                    Precisamos de algumas informações para encaminhar sua solicitação ao setor correto.
                 </p>
             </header>
+
+            <div className="w-full flex flex-col gap-8 mb-8">
+                <FormSelect
+                    label="Secretaria / Departamento"
+                    placeholder="Selecione o departamento responsável"
+                    icon={Building2}
+                    options={secretariats}
+                    value={secretaria}
+                    onChange={(e) => setSecretariaState(e.target.value)}
+                />
+
+                <FormInput
+                    label="Endereço da Ocorrência"
+                    placeholder="Rua, número, bairro..."
+                    icon={MapPin}
+                    value={endereco}
+                    onChange={(e) => setEnderecoState(e.target.value)}
+                />
+            </div>
+
+            <div className="w-full mb-4">
+                <label className="text-xl font-bold text-grafite mb-2 block">Descrição do Ocorrido</label>
+            </div>
 
             {/* Área de Texto / Card Principal */}
             <div className="relative w-full">
@@ -80,8 +137,8 @@ export default function RelatoPage() {
             <div className="fixed bottom-0 left-0 w-full p-8 bg-white/80 backdrop-blur-md border-t border-slate-100 z-50 flex justify-center">
                 <motion.button
                     whileTap={{ scale: 0.98 }}
-                    disabled={!text}
-                    onClick={() => router.push("/registro/finalizar")}
+                    disabled={!text || !secretaria || !endereco}
+                    onClick={handleContinue}
                     className="w-full max-w-6xl h-24 bg-primary text-white rounded-[24px] text-3xl font-bold flex items-center justify-center gap-4 shadow-xl shadow-primary/20 disabled:opacity-50 disabled:grayscale transition-all"
                 >
                     CONTINUAR

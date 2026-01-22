@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, Megaphone, Building2, MapPin, Send, Laptop, Phone, Mail, Globe } from "lucide-react";
+import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { motion } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { clsx, type ClassValue } from "clsx";
@@ -12,7 +13,21 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function FinalizarPage() {
+    const { data } = useManifestacao();
     const [agreed, setAgreed] = useState(false);
+
+    const getCategoryDetails = (id: string | null) => {
+        const categories = {
+            elogio: { label: "Elogio", color: "text-verde-natureza bg-verde-natureza/5" },
+            sugestao: { label: "Sugestão", color: "text-amarelo-aventura bg-amarelo-aventura/5" },
+            reclamacao: { label: "Reclamação", color: "text-orange-500 bg-orange-500/5" },
+            denuncia: { label: "Denúncia", color: "text-slate-700 bg-slate-700/5" },
+            informacao: { label: "Informação", color: "text-sky-500 bg-sky-500/5" },
+        };
+        return categories[id as keyof typeof categories] || { label: "Não selecionado", color: "text-primary bg-primary/10" };
+    };
+
+    const categoryDetails = getCategoryDetails(data.categoria);
 
     return (
         <div className="flex flex-col items-center max-w-6xl mx-auto pb-20">
@@ -37,7 +52,7 @@ export default function FinalizarPage() {
                 </div>
 
                 <div className="p-10">
-                    <div className="grid grid-cols-2 gap-y-12 gap-x-12 mb-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-y-12 gap-x-12 mb-12">
                         {/* Identificação */}
                         <div className="flex gap-6">
                             <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center text-primary shrink-0">
@@ -45,19 +60,25 @@ export default function FinalizarPage() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-slate-400 font-bold uppercase text-sm tracking-wider">Identificação</span>
-                                <span className="text-2xl font-bold text-grafite">Maria da Silva</span>
-                                <span className="text-slate-400 font-medium">123.456.789-00</span>
+                                <span className="text-2xl font-bold text-grafite">
+                                    {data.identificacao.mode === 'anonimo' ? "Anônimo" : data.identificacao.nome || "Nome não informado"}
+                                </span>
+                                {data.identificacao.mode === 'identificado' && (
+                                    <span className="text-slate-400 font-medium">{data.identificacao.contato || "Contato não informado"}</span>
+                                )}
                             </div>
                         </div>
 
                         {/* Tipo */}
                         <div className="flex gap-6">
-                            <div className="w-16 h-16 bg-amarelo-aventura/5 rounded-full flex items-center justify-center text-amarelo-aventura shrink-0">
+                            <div className={`w-16 h-16 rounded-full flex items-center justify-center shrink-0 ${categoryDetails.color}`}>
                                 <Megaphone className="w-8 h-8" />
                             </div>
                             <div className="flex flex-col items-start gap-1">
                                 <span className="text-slate-400 font-bold uppercase text-sm tracking-wider">Tipo de Manifestação</span>
-                                <span className="px-4 py-1 bg-primary/10 text-primary font-bold rounded-lg text-lg">Reclamação</span>
+                                <span className="px-4 py-1 bg-primary/10 text-primary font-bold rounded-lg text-lg">
+                                    {categoryDetails.label}
+                                </span>
                             </div>
                         </div>
 
@@ -67,9 +88,8 @@ export default function FinalizarPage() {
                                 <Building2 className="w-8 h-8" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-slate-400 font-bold uppercase text-sm tracking-wider">Departamento</span>
-                                <span className="text-2xl font-bold text-grafite">Obras e Serviços Urbanos</span>
-                                <span className="text-slate-400 font-medium">Manutenção de Vias</span>
+                                <span className="text-slate-400 font-bold uppercase text-sm tracking-wider">Departamento/Secretaria</span>
+                                <span className="text-xl font-bold text-grafite text-balance">{data.secretaria || "Não informado"}</span>
                             </div>
                         </div>
 
@@ -80,8 +100,8 @@ export default function FinalizarPage() {
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-slate-400 font-bold uppercase text-sm tracking-wider">Local do Ocorrido</span>
-                                <span className="text-2xl font-bold text-grafite">Rua Coronel Eugênio Motta, 230</span>
-                                <span className="text-slate-400 font-medium tracking-tight">Centro - Boituva/SP</span>
+                                <span className="text-xl font-bold text-grafite text-balance">{data.endereco || "Não informado"}</span>
+                                <span className="text-slate-400 font-medium tracking-tight">Boituva/SP</span>
                             </div>
                         </div>
                     </div>
@@ -89,16 +109,12 @@ export default function FinalizarPage() {
                     {/* Descrição em destaque */}
                     <div className="bg-slate-50/50 rounded-[32px] p-8 border border-slate-100">
                         <span className="text-slate-400 font-bold uppercase text-sm tracking-wider block mb-4">Descrição do Ocorrido</span>
-                        <p className="text-xl text-grafite/80 leading-relaxed italic">
-                            "Há um buraco de grandes proporções na via pública que está dificultando o trânsito e causando riscos de acidentes para motoristas e pedestres. O problema persiste há mais de duas semanas sem sinalização adequada."
+                        <p className="text-xl text-grafite/80 leading-relaxed italic break-words whitespace-pre-wrap">
+                            "{data.relato || "Nenhuma descrição fornecida."}"
                         </p>
                     </div>
-
-                    <div className="mt-8 flex items-center gap-3 text-slate-400">
-                        <Laptop className="w-5 h-5" />
-                        <span className="font-medium text-lg italic">2 arquivos anexados (foto_buraco_1.jpg, foto_buraco_2.jpg)</span>
-                    </div>
                 </div>
+
             </div>
 
             {/* Ações Finais */}
