@@ -5,6 +5,7 @@ import { BarChart3, MessageSquare, Clock, ThumbsUp } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TypeChart } from "@/components/dashboard/TypeChart";
 import { DepartmentChart } from "@/components/dashboard/DepartmentChart";
+import { TimelineChart } from "@/components/dashboard/TimelineChart";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
 import { getDashboardData, DashboardStats } from "@/app/actions/dashboard";
 import Image from "next/image";
@@ -90,6 +91,11 @@ export default function TransparenciaPage() {
                         color="yellow"
                     />
                 </div>
+            </section>
+
+            {/* Timeline Chart */}
+            <section className="max-w-7xl mx-auto mb-8">
+                <TimelineChart data={stats.evolucaoTemporal} periodo={activeFilter} />
             </section>
 
             {/* Charts Section */}

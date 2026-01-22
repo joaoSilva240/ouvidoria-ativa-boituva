@@ -9,6 +9,7 @@ export interface DashboardStats {
     nivelSatisfacao: string;
     distribuicaoPorTipo: Array<{ name: string; value: number; color: string }>;
     distribuicaoPorSecretaria: Array<{ name: string; manifestacoes: number }>;
+    evolucaoTemporal: Array<{ data: string; manifestacoes: number }>;
 }
 
 export async function getDashboardData(periodo: string): Promise<DashboardStats> {
@@ -82,14 +83,111 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             .sort((a, b) => b.manifestacoes - a.manifestacoes)
             .slice(0, 5); // Top 5 secretarias
 
-        // 4. Taxa de resposta (simulada - você precisará ter um campo "respondida" na tabela)
-        const taxaResposta = "95%";
+        // 4. Taxa de resposta REAL
+        const { count: respondidas } = await supabase
+            .from("manifestacoes")
+            .select("*", { count: "exact", head: true })
+            .gte("created_at", startDate.toISOString())
+            .eq("respondida", true);
 
-        // 5. Tempo médio (simulado)
-        const tempoMedio = "3 dias";
+        const taxaRespostaNum = totalManifestacoes && totalManifestacoes > 0
+            ? Math.round((respondidas! / totalManifestacoes) * 100)
+            : 0;
+        const taxaResposta = `${taxaRespostaNum}%`;
 
-        // 6. Nível de satisfação (pode vir do campo "humor")
-        const nivelSatisfacao = "4.5/5";
+        // 5. Tempo médio de resposta REAL
+        const { data: manifestacoesRespondidas } = await supabase
+            .from("manifestacoes")
+            .select("created_at, data_resposta")
+            .gte("created_at", startDate.toISOString())
+            .eq("respondida", true)
+            .not("data_resposta", "is", null);
+
+        let tempoMedio = "N/A";
+        if (manifestacoesRespondidas && manifestacoesRespondidas.length > 0) {
+            const temposTotais = manifestacoesRespondidas.map((m) => {
+                const criacao = new Date(m.created_at);
+                const resposta = new Date(m.data_resposta!);
+                return (resposta.getTime() - criacao.getTime()) / (1000 * 60 * 60 * 24); // Converter para dias
+            });
+
+            const mediaEmDias = temposTotais.reduce((a, b) => a + b, 0) / temposTotais.length;
+            tempoMedio = mediaEmDias < 1
+                ? "< 1 dia"
+                : `${Math.round(mediaEmDias)} dia${Math.round(mediaEmDias) !== 1 ? 's' : ''}`;
+        }
+
+        // 6. Nível de satisfação REAL (baseado no campo humor)
+        const { data: humorData } = await supabase
+            .from("manifestacoes")
+            .select("humor")
+            .gte("created_at", startDate.toISOString())
+            .not("humor", "is", null);
+
+        let nivelSatisfacao = "N/A";
+        if (humorData && humorData.length > 0) {
+            const humorMap: Record<string, number> = {
+                "FELIZ": 5,
+                "NEUTRO": 3,
+                "TRISTE": 1,
+            };
+
+            const notas = humorData
+                .map((h) => humorMap[h.humor] || 3)
+                .filter((nota) => nota !== undefined);
+
+            if (notas.length > 0) {
+                const media = notas.reduce((a, b) => a + b, 0) / notas.length;
+                nivelSatisfacao = `${media.toFixed(1)}/5`;
+            }
+        }
+
+        // 7. Evolução temporal (agregação por dia/semana/mês)
+        const { data: allManifestacoes } = await supabase
+            .from("manifestacoes")
+            .select("created_at")
+            .gte("created_at", startDate.toISOString())
+            .order("created_at", { ascending: true });
+
+        const evolucaoTemporal: Array<{ data: string; manifestacoes: number }> = [];
+
+        if (allManifestacoes && allManifestacoes.length > 0) {
+            const dateCounts: Record<string, number> = {};
+
+            // Determinar granularidade baseado no período
+            const formatDate = (dateStr: string): string => {
+                const date = new Date(dateStr);
+
+                if (periodo === "30dias") {
+                    // Agrupar por dia
+                    return date.toISOString().split("T")[0];
+                } else if (periodo === "ano") {
+                    // Agrupar por mês
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    return `${year}-${month}`;
+                } else {
+                    // Total: agrupar por mês também
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, "0");
+                    return `${year}-${month}`;
+                }
+            };
+
+            // Contar manifestações por data
+            allManifestacoes.forEach((m) => {
+                const dateKey = formatDate(m.created_at);
+                dateCounts[dateKey] = (dateCounts[dateKey] || 0) + 1;
+            });
+
+            // Converter para array e ordenar
+            evolucaoTemporal.push(
+                ...Object.entries(dateCounts)
+                    .map(([data, manifestacoes]) => ({ data, manifestacoes }))
+                    .sort((a, b) => a.data.localeCompare(b.data))
+            );
+        }
+
 
         return {
             totalManifestacoes: totalManifestacoes || 0,
@@ -98,6 +196,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             nivelSatisfacao,
             distribuicaoPorTipo,
             distribuicaoPorSecretaria,
+            evolucaoTemporal,
         };
     } catch (error) {
         console.error("Erro ao buscar dados do dashboard:", error);
@@ -110,6 +209,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             nivelSatisfacao: "N/A",
             distribuicaoPorTipo: [],
             distribuicaoPorSecretaria: [],
+            evolucaoTemporal: [],
         };
     }
 }
