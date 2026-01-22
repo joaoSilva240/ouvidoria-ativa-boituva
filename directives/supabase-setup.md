@@ -16,6 +16,10 @@ NEXT_PUBLIC_SUPABASE_URL=seu_projeto_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_chave_anonima
 ```
 
+### 🚨 Troubleshooting Comum de CHAVES
+1. **Formato da Chave**: A `NEXT_PUBLIC_SUPABASE_ANON_KEY` é um JWT. Ela **SEMPRE** começa com `ey`. Se a chave copiada for curta (ex: UUID) ou começar com `sb_`, está errada. Copie a chave completa no dashboard.
+2. **Reinicie o Servidor**: Se você alterar o `.env.local`, você **TEM** que reiniciar o servidor (`npm run dev`) para que as mudanças surtam efeito. O Next.js não recarrega variáveis de ambiente "a quente".
+
 ## 3. Estrutura de Clientes Supabase
 
 Devido à natureza do Next.js (Server vs Client Components), precisamos de utilitários distintos. Crie a pasta `src/utils/supabase`.
@@ -133,22 +137,31 @@ export async function updateSession(request: NextRequest) {
 
 Para iniciar uma sessão anônima assim que o app carrega (ex: no `layout.tsx` ou Provider):
 
+### 🚨 Checklist Crítico para Autenticação Anônima
+1. **Ativar no Dashboard**: Por padrão, o login anônimo vem **DESATIVADO**. Vá em `Supabase Dashboard > Authentication > Providers > Anonymous Sign-ins` e ative.
+2. **Refresh Router**: O cookie setado no client não é visto imediatamente pelo Server Action. Após o login, force um `router.refresh()`.
+
 ```typescript
 // Em um Client Component ou useEffect
+import { useRouter } from "next/navigation";
+
 const supabase = createClient()
+const router = useRouter();
 
 useEffect(() => {
     async function signIn() {
-        // Verifica se já existe sessão
         const { data: { session } } = await supabase.auth.getSession()
         
         if (!session) {
-            // Cria sessão anônima
-            await supabase.auth.signInAnonymously()
+            const { error } = await supabase.auth.signInAnonymously()
+             if (!error) {
+                // FORÇA O SERVIDOR A LER O NOVO COOKIE
+                router.refresh(); 
+            }
         }
     }
     signIn()
-}, [])
+}, [router])
 ```
 
 ---
