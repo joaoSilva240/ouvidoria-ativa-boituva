@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Plus, Search } from "lucide-react";
 
 import { ActionCard } from "@/components/ActionCard";
@@ -20,12 +21,14 @@ export default function LandingPage() {
 
             {/* Action Cards Section */}
             <section className="flex flex-col gap-6 w-full items-center">
-                <ActionCard
-                    title="Registrar Nova Manifestação"
-                    subtitle="Faça elogios, sugestões ou denúncias"
-                    icon={Plus}
-                    variant="primary"
-                />
+                <Link href="/registro/identificacao" className="w-full max-w-2xl">
+                    <ActionCard
+                        title="Registrar Nova Manifestação"
+                        subtitle="Faça elogios, sugestões ou denúncias"
+                        icon={Plus}
+                        variant="primary"
+                    />
+                </Link>
                 <ActionCard
                     title="Consultar Manifestação"
                     subtitle="Acompanhe o status do seu pedido"
