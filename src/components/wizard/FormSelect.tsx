@@ -35,7 +35,7 @@ export function FormSelect({ label, icon: Icon, options, placeholder, className,
                         className
                     )}
                 >
-                    <option value="" disabled selected hidden>
+                    <option value="" disabled hidden>
                         {placeholder || "Selecione uma opção"}
                     </option>
                     {options.map((option) => (

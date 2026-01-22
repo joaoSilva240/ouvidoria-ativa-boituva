@@ -35,6 +35,7 @@ export async function saveManifestacao(data: ManifestacaoData) {
             endereco: data.endereco,
             relato: data.relato,
             identificacao_dados: data.identificacao,
+            humor: data.humor,
             status: 'PENDENTE',
             // anexos: Implementar lógica de upload separada se necessário
         };

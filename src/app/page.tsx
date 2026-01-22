@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, BarChart3 } from "lucide-react";
 import Image from "next/image";
 
 import { ActionCard } from "@/components/ActionCard";
@@ -42,6 +42,14 @@ export default function LandingPage() {
                         subtitle="Acompanhe o status do seu pedido"
                         icon={Search}
                         variant="grafite"
+                    />
+                </Link>
+                <Link href="/transparencia" className="w-full max-w-2xl">
+                    <ActionCard
+                        title="Painel de Transparência"
+                        subtitle="Veja dados e estatísticas das manifestações"
+                        icon={BarChart3}
+                        variant="primary"
                     />
                 </Link>
             </section>

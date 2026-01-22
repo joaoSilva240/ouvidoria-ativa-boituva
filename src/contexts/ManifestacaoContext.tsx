@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { HumorType } from "@/components/SentimentWidget";
 
 export type Identificacao = {
     mode: "identificado" | "anonimo";
@@ -17,6 +18,7 @@ export type ManifestacaoData = {
     secretaria: string;
     endereco: string;
     arquivos: File[]; // Placeholder for future use
+    humor: HumorType; // Mood tracking
 };
 
 interface ManifestacaoContextType {
@@ -28,6 +30,7 @@ interface ManifestacaoContextType {
     setEndereco: (text: string) => void;
     addArquivo: (file: File) => void;
     removeArquivo: (index: number) => void;
+    setHumor: (humor: HumorType) => void;
     reset: () => void;
 }
 
@@ -38,6 +41,7 @@ const defaultData: ManifestacaoData = {
     secretaria: "",
     endereco: "",
     arquivos: [],
+    humor: null,
 };
 
 const ManifestacaoContext = createContext<ManifestacaoContextType | undefined>(undefined);
@@ -74,6 +78,10 @@ export function ManifestacaoProvider({ children }: { children: ReactNode }) {
             ...prev,
             arquivos: prev.arquivos.filter((_, i) => i !== index),
         }));
+    };
+
+    const setHumor = (humor: HumorType) => {
+        setData((prev) => ({ ...prev, humor }));
     };
 
     const reset = () => {
@@ -114,6 +122,7 @@ export function ManifestacaoProvider({ children }: { children: ReactNode }) {
                 setEndereco,
                 addArquivo,
                 removeArquivo,
+                setHumor,
                 reset,
             }}
         >
