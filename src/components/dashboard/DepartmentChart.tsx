@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 interface DepartmentData {
     name: string;
@@ -11,6 +11,8 @@ interface DepartmentData {
 interface DepartmentChartProps {
     data: DepartmentData[];
 }
+
+const SECRETARIA_COLORS = ["#0EA5E9", "#10B981", "#F59E0B", "#F97316", "#334155"];
 
 export function DepartmentChart({ data }: DepartmentChartProps) {
     return (
@@ -45,10 +47,13 @@ export function DepartmentChart({ data }: DepartmentChartProps) {
                     />
                     <Bar
                         dataKey="manifestacoes"
-                        fill="#0EA5E9"
                         radius={[8, 8, 0, 0]}
                         maxBarSize={80}
-                    />
+                    >
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={SECRETARIA_COLORS[index % SECRETARIA_COLORS.length]} />
+                        ))}
+                    </Bar>
                 </BarChart>
             </ResponsiveContainer>
         </motion.div>

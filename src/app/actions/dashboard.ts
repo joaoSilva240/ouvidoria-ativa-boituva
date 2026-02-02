@@ -51,11 +51,11 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
         });
 
         const colorMap: Record<string, string> = {
-            "ELOGIO": "#10B981", // Verde Natureza
-            "SUGESTAO": "#F59E0B", // Amarelo Aventura
-            "RECLAMACAO": "#78350F", // Marrom Cidade
-            "DENUNCIA": "#334155", // Grafite
-            "OUTROS": "#94a3b8", // Slate
+            "ELOGIO": "#10B981",      // Verde Natureza
+            "SUGESTAO": "#F59E0B",    // Amarelo Aventura
+            "RECLAMACAO": "#F97316",  // Laranja
+            "DENUNCIA": "#334155",    // Grafite
+            "INFORMACAO": "#0EA5E9",  // Azul Céu
         };
 
         const distribuicaoPorTipo = Object.entries(tipoCounts).map(([tipo, count]) => ({

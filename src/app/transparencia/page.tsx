@@ -116,13 +116,21 @@ export default function TransparenciaPage() {
             </section>
 
             {/* Back Button */}
-            <footer className="max-w-7xl mx-auto text-center">
+            <footer className="max-w-7xl mx-auto text-center space-y-4">
                 <Link
-                    href="/"
-                    className="inline-block bg-grafite text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-grafite/90 transition-colors"
+                    href="/transparencia/manifestacoes"
+                    className="inline-block bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary/90 transition-colors"
                 >
-                    Voltar ao Início
+                    Ver Todas as Manifestações
                 </Link>
+                <div>
+                    <Link
+                        href="/"
+                        className="inline-block bg-grafite text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-grafite/90 transition-colors"
+                    >
+                        Voltar ao Início
+                    </Link>
+                </div>
             </footer>
         </main>
     );
