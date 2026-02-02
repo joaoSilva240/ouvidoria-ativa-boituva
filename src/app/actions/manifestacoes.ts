@@ -158,3 +158,73 @@ export async function getSecretarias(): Promise<string[]> {
         return [];
     }
 }
+
+export async function getManifestacaoByProtocolo(protocolo: string) {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from("manifestacoes")
+        .select("*")
+        .eq("protocolo", protocolo)
+        .single();
+
+    if (error) {
+        console.error("Error fetching manifestacao:", error);
+        return null;
+    }
+
+    // Map `identificacao_dados` to top-level fields
+    const mappedData = {
+        ...data,
+        nome_cidadao: data.identificacao_dados?.nome || null,
+        cpf: data.identificacao_dados?.contato || null, // Assuming contact often holds CPF/Email, check structure if needed
+        contato: data.identificacao_dados?.contato || null,
+        tipo: data.tipo?.toUpperCase() || "OUTROS",
+        status: data.status?.toUpperCase() || "PENDENTE",
+    };
+
+    return mappedData;
+}
+
+export async function updateManifestacaoStatus(id: string, status: string) {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+        .from("manifestacoes")
+        .update({ status: status.toLowerCase() }) // DB uses lowercase
+        .eq("id", id);
+
+    if (error) {
+        console.error("Error updating status:", error);
+        throw new Error("Failed to update status");
+    }
+
+    return { success: true };
+}
+
+export async function sendManifestacaoResponse(id: string, resposta: string, notas: string, status: string = "CONCLUIDO") {
+    const supabase = await createClient();
+
+    const updateData: any = {};
+    if (resposta) updateData.resposta_oficial = resposta;
+    if (notas) updateData.notas_internas = notas;
+    if (status) updateData.status = status.toLowerCase();
+
+    // Auto-mark as responded if there is a response
+    if (resposta) {
+        updateData.respondida = true;
+        updateData.data_resposta = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+        .from("manifestacoes")
+        .update(updateData)
+        .eq("id", id);
+
+    if (error) {
+        console.error("Error sending response:", error);
+        throw new Error("Failed to send response");
+    }
+
+    return { success: true };
+}
