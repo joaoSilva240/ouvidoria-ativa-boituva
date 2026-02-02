@@ -29,12 +29,12 @@ export function CategoryCard({
             whileTap={{ scale: 0.98 }}
             onClick={onClick}
             className={cn(
-                "bg-white rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 transition-all shadow-md border-4 h-56",
+                "bg-white rounded-[32px] p-8 flex flex-col items-center justify-center gap-4 transition-all shadow-md border-4 h-56 w-full",
                 isActive ? "border-primary" : "border-transparent"
             )}
         >
             <div
-                className="w-20 h-20 rounded-full flex items-center justify-center transition-colors"
+                className="w-20 h-20 rounded-full flex items-center justify-center transition-colors flex-shrink-0"
                 style={{ backgroundColor: `${color}15`, color: color }}
             >
                 <Icon className="w-10 h-10" strokeWidth={2.5} />

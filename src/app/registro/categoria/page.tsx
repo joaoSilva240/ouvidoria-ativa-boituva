@@ -42,30 +42,38 @@ export default function CategoriaPage() {
             </header>
 
             {/* Grid de Categorias */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full mb-16">
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-8 w-full mb-16 px-4 md:px-0">
+                {/* Primeira Linha: 3 Colunas (cada uma ocupa 2 de 6) */}
                 {categories.slice(0, 3).map((cat) => (
-                    <CategoryCard
-                        key={cat.id}
-                        label={cat.label}
-                        icon={cat.icon}
-                        color={cat.color}
-                        isActive={selected === cat.id}
-                        onClick={() => setSelected(cat.id)}
-                    />
+                    <div key={cat.id} className="md:col-span-2">
+                        <CategoryCard
+                            label={cat.label}
+                            icon={cat.icon}
+                            color={cat.color}
+                            isActive={selected === cat.id}
+                            onClick={() => setSelected(cat.id)}
+                        />
+                    </div>
                 ))}
-                <div className="md:col-span-3 flex justify-center gap-8">
-                    {categories.slice(3).map((cat) => (
-                        <div key={cat.id} className="w-full md:w-1/3">
-                            <CategoryCard
-                                label={cat.label}
-                                icon={cat.icon}
-                                color={cat.color}
-                                isActive={selected === cat.id}
-                                onClick={() => setSelected(cat.id)}
-                            />
-                        </div>
-                    ))}
-                </div>
+
+                {/* Segunda Linha: 2 Colunas Centralizadas */}
+                {/* Espaçador para pular a primeira coluna de 6 */}
+                <div className="hidden md:block md:col-span-1" />
+
+                {categories.slice(3).map((cat) => (
+                    <div key={cat.id} className="md:col-span-2">
+                        <CategoryCard
+                            label={cat.label}
+                            icon={cat.icon}
+                            color={cat.color}
+                            isActive={selected === cat.id}
+                            onClick={() => setSelected(cat.id)}
+                        />
+                    </div>
+                ))}
+
+                {/* Espaçador para completar o grid (opcional, mas bom para clareza) */}
+                <div className="hidden md:block md:col-span-1" />
             </div>
 
             <motion.button
