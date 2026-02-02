@@ -28,7 +28,6 @@ graph TB
     
     subgraph "Server Layer (Next.js)"
         SA[Server Actions]
-        Prisma[Prisma ORM]
     end
     
     subgraph "Data Layer (Supabase)"
@@ -39,19 +38,17 @@ graph TB
     User[👤 Citizen] --> UI
     UI --> Router
     Router --> SA
-    SA --> Prisma
-    Prisma --> DB
+    SA --> DB
     Auth -.-> SA
     
     style UI fill:#000,stroke:#fff,color:#fff
     style DB fill:#3ECF8E,stroke:#000,color:#fff
-    style Prisma fill:#0C344B,stroke:#fff,color:#fff
 ```
 
 ### Key Integrations
 - **Frontend**: Next.js 16 (App Router) with client-side interactivity via Framer Motion.
 - **Backend Logic**: Server Actions handle form submissions and validation.
-- **Database**: Supabase PostgreSQL accessed via Prisma ORM for type safety.
+- **Database**: Supabase PostgreSQL accessed directly via modern Server Actions.
 
 ---
 
