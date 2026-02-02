@@ -37,17 +37,18 @@ export async function getManifestacoes(
         // Build query
         let query = supabase
             .from("manifestacoes")
-            .select("id, protocolo, created_at, nome_cidadao, cpf, tipo, secretaria, status", { count: "exact" });
+            .select("id, protocolo, created_at, identificacao_dados, tipo, secretaria, status", { count: "exact" });
 
-        // Apply search filter (protocolo, nome, or cpf)
+        // Apply search filter (protocolo, nome, or cpf/contato)
         if (filters.search && filters.search.trim()) {
             const searchTerm = filters.search.trim();
-            query = query.or(`protocolo.ilike.%${searchTerm}%,nome_cidadao.ilike.%${searchTerm}%,cpf.ilike.%${searchTerm}%`);
+            query = query.or(`protocolo.ilike.%${searchTerm}%,identificacao_dados->>nome.ilike.%${searchTerm}%,identificacao_dados->>contato.ilike.%${searchTerm}%`);
         }
 
         // Apply tipo filter
         if (filters.tipo && filters.tipo !== "TODOS") {
-            query = query.eq("tipo", filters.tipo);
+            // Cuidado: filtros.tipo vem em UPPERCASE da UI, mas no DB pode estar em lowercase
+            query = query.ilike("tipo", filters.tipo);
         }
 
         // Apply secretaria filter
@@ -56,15 +57,15 @@ export async function getManifestacoes(
         }
 
         // Apply identidade filter
-        if (filters.identidade) {
+        if (filters.identidade && filters.identidade !== "TODOS") {
             if (filters.identidade === "ANONIMO") {
-                query = query.is("nome_cidadao", null);
+                query = query.eq("identificacao_dados->>mode", "anonimo");
             } else if (filters.identidade === "IDENTIFICADO") {
-                query = query.not("nome_cidadao", "is", null);
+                query = query.eq("identificacao_dados->>mode", "identificado");
             }
         }
 
-        // Apply periodo filter
+        // ... (resto do código de período se mantém igual)
         if (filters.periodo && filters.periodo !== "TOTAL") {
             const now = new Date();
             let startDate = new Date();
@@ -103,11 +104,23 @@ export async function getManifestacoes(
             };
         }
 
+        // Map data to interface
+        const mappedData: ManifestacaoListItem[] = (data || []).map((item: any) => ({
+            id: item.id,
+            protocolo: item.protocolo,
+            created_at: item.created_at,
+            nome_cidadao: item.identificacao_dados?.nome || null,
+            cpf: item.identificacao_dados?.contato || null, // No context de Boituva, contato costuma ser o CPF/email
+            tipo: item.tipo,
+            secretaria: item.secretaria,
+            status: item.status,
+        }));
+
         const total = count || 0;
         const totalPages = Math.ceil(total / perPage);
 
         return {
-            data: data || [],
+            data: mappedData,
             total,
             page,
             totalPages,

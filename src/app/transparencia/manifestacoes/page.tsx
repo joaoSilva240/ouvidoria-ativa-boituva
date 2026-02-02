@@ -30,11 +30,11 @@ const PERIODO_OPTIONS = [
 ];
 
 const TIPO_COLORS: Record<string, string> = {
-    "ELOGIO": "#10B981",
-    "SUGESTAO": "#F59E0B",
-    "RECLAMACAO": "#F97316",
-    "DENUNCIA": "#334155",
-    "INFORMACAO": "#0EA5E9",
+    "elogio": "#10B981",
+    "sugestao": "#F59E0B",
+    "reclamacao": "#F97316",
+    "denuncia": "#334155",
+    "informacao": "#0EA5E9",
 };
 
 const STATUS_COLORS: Record<string, string> = {
