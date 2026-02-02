@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0EA5E9; /* Azul Céu aproximado */
+  --color-primary: #0EA5E9;
+  /* Azul Céu aproximado */
   --color-marrom-cidade: #78350F;
   --color-amarelo-aventura: #F59E0B;
   --color-verde-natureza: #10B981;
   --color-grafite: #334155;
-  
+
   --font-sans: "Poppins", ui-sans-serif, system-ui;
 }
