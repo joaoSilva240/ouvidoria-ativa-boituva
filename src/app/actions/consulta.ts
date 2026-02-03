@@ -1,6 +1,6 @@
 "use server";
 
-import { adminClient } from "@/utils/supabase/admin";
+import { createClient } from "@/utils/supabase/server";
 
 export async function getManifestacaoByProtocol(protocolo: string) {
     // 1. Validação básica
@@ -8,9 +8,10 @@ export async function getManifestacaoByProtocol(protocolo: string) {
         return { success: false, error: "Protocolo inválido." };
     }
 
-    // 2. Busca usando o Cliente Admin (Service Role) - Ignora RLS
+    // 2. Busca usando o Cliente Padrão (Anon Key)
     try {
-        const { data, error } = await adminClient
+        const supabase = await createClient();
+        const { data, error } = await supabase
             .from("manifestacoes")
             .select(`
                 id,

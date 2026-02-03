@@ -300,12 +300,13 @@ export default function ManifestacoesPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-center">
-                                                <button
-                                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                                                <Link
+                                                    href={`/transparencia/manifestacoes/${item.protocolo}`}
+                                                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors inline-block"
                                                     title="Ver detalhes"
                                                 >
                                                     <Eye className="w-5 h-5 text-grafite/60" />
-                                                </button>
+                                                </Link>
                                             </td>
                                         </motion.tr>
                                     ))}
