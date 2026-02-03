@@ -23,7 +23,8 @@ export async function getManifestacaoByProtocol(protocolo: string) {
                 status,
                 created_at,
                 updated_at,
-                anexos
+                anexos,
+                resposta_oficial
             `)
             .eq("protocolo", protocolo.trim().toUpperCase())
             .single();
@@ -48,7 +49,8 @@ export async function getManifestacaoByProtocol(protocolo: string) {
                 tipo: data.tipo,
                 secretaria: data.secretaria,
                 relato: data.relato, // Decidir se mostramos o relato (público? sim, geralmente)
-                endereco: data.endereco
+                endereco: data.endereco,
+                resposta_oficial: data.resposta_oficial
             }
         };
 

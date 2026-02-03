@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { WizardHeader } from "@/components/wizard/WizardHeader";
-import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin } from "lucide-react";
+import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getManifestacaoByProtocol } from "@/app/actions/consulta";
 
@@ -194,9 +194,28 @@ export default function ConsultaPage() {
 
                                 <div className="md:col-span-2 pt-8 border-t border-slate-100">
                                     <span className="text-slate-400 font-bold uppercase text-xs tracking-wider block mb-4">Relato Registrado</span>
-                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8">
                                         <p className="text-grafite/80 italic text-lg leading-relaxed whitespace-pre-wrap">"{result.relato}"</p>
                                     </div>
+
+                                    {result.resposta_oficial && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="bg-primary/5 p-8 rounded-3xl border-2 border-primary/10 relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Send className="w-16 h-16 text-primary" />
+                                            </div>
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                                                    <Send className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-primary font-bold uppercase text-xs tracking-widest">Resposta da Ouvidoria</span>
+                                            </div>
+                                            <p className="text-grafite font-medium text-xl leading-relaxed whitespace-pre-wrap">{result.resposta_oficial}</p>
+                                        </motion.div>
+                                    )}
                                 </div>
                             </div>
 
