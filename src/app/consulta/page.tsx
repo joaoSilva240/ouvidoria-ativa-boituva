@@ -3,15 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { WizardHeader } from "@/components/wizard/WizardHeader";
-import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin } from "lucide-react";
+import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getManifestacaoByProtocol } from "@/app/actions/consulta";
+import { getManifestacaoByProtocol, saveSatisfacaoResposta } from "@/app/actions/consulta";
+import { SentimentWidget, HumorType } from "@/components/SentimentWidget";
 
 export default function ConsultaPage() {
     const [protocolo, setProtocolo] = useState("");
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<any>(null); // TODO: Tipar
     const [error, setError] = useState("");
+    const [satisfacao, setSatisfacao] = useState<HumorType>(null);
+    const [satisfacaoSalva, setSatisfacaoSalva] = useState(false);
+    const [salvandoSatisfacao, setSalvandoSatisfacao] = useState(false);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -27,10 +31,33 @@ export default function ConsultaPage() {
         const response = await getManifestacaoByProtocol(protocolo);
         setLoading(false);
 
-        if (response.success) {
+        if (response.success && response.data) {
             setResult(response.data);
+            // Se já tem satisfação salva, marcar como salva
+            if (response.data.satisfacao_resposta) {
+                setSatisfacao(response.data.satisfacao_resposta as HumorType);
+                setSatisfacaoSalva(true);
+            } else {
+                setSatisfacao(null);
+                setSatisfacaoSalva(false);
+            }
         } else {
             setError(response.error || "Manifestação não encontrada.");
+        }
+    };
+
+    const handleSatisfacaoChange = async (humor: HumorType) => {
+        if (!result || satisfacaoSalva || !humor) return;
+
+        setSatisfacao(humor);
+        setSalvandoSatisfacao(true);
+
+        const response = await saveSatisfacaoResposta(result.protocolo, humor);
+
+        setSalvandoSatisfacao(false);
+
+        if (response.success) {
+            setSatisfacaoSalva(true);
         }
     };
 
@@ -194,9 +221,62 @@ export default function ConsultaPage() {
 
                                 <div className="md:col-span-2 pt-8 border-t border-slate-100">
                                     <span className="text-slate-400 font-bold uppercase text-xs tracking-wider block mb-4">Relato Registrado</span>
-                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
+                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8">
                                         <p className="text-grafite/80 italic text-lg leading-relaxed whitespace-pre-wrap">"{result.relato}"</p>
                                     </div>
+
+                                    {result.resposta_oficial && (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="bg-primary/5 p-8 rounded-3xl border-2 border-primary/10 relative overflow-hidden"
+                                        >
+                                            <div className="absolute top-0 right-0 p-4 opacity-10">
+                                                <Send className="w-16 h-16 text-primary" />
+                                            </div>
+                                            <div className="flex items-center gap-3 mb-4">
+                                                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+                                                    <Send className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-primary font-bold uppercase text-xs tracking-widest">Resposta da Ouvidoria</span>
+                                            </div>
+                                            <p className="text-grafite font-medium text-xl leading-relaxed whitespace-pre-wrap">{result.resposta_oficial}</p>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Pesquisa de Satisfação - Apenas se concluído e tem resposta */}
+                                    {result.status === 'CONCLUIDO' && result.resposta_oficial && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            className="md:col-span-2 mt-8"
+                                        >
+                                            {satisfacaoSalva ? (
+                                                <div className="bg-green-50 p-8 rounded-3xl border-2 border-green-100 text-center">
+                                                    <span className="text-green-600 font-bold text-lg">
+                                                        ✓ Obrigado pela sua avaliação!
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
+                                                    <h4 className="text-xl font-bold text-grafite mb-6 text-center">
+                                                        Como você avalia a resposta recebida?
+                                                    </h4>
+                                                    <div className="flex justify-center">
+                                                        <SentimentWidget
+                                                            value={satisfacao}
+                                                            onChange={handleSatisfacaoChange}
+                                                        />
+                                                    </div>
+                                                    {salvandoSatisfacao && (
+                                                        <p className="text-center text-slate-400 mt-4">
+                                                            Salvando avaliação...
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
                                 </div>
                             </div>
 

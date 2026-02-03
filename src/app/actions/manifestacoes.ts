@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { adminClient } from "@/utils/supabase/admin";
 
 export interface ManifestacaoListItem {
     id: number;
@@ -160,11 +161,12 @@ export async function getSecretarias(): Promise<string[]> {
 }
 
 export async function getManifestacaoByProtocolo(protocolo: string) {
-    const supabase = await createClient();
+    // USING ADMIN CLIENT TO BYPASS RLS AND ENSURE RELATO IS FETCHED
+    const supabase = adminClient;
 
     const { data, error } = await supabase
         .from("manifestacoes")
-        .select("*")
+        .select("id, protocolo, created_at, identificacao_dados, tipo, secretaria, status, relato, resposta_oficial, notas_internas, endereco")
         .eq("protocolo", protocolo)
         .single();
 
@@ -179,6 +181,7 @@ export async function getManifestacaoByProtocolo(protocolo: string) {
         nome_cidadao: data.identificacao_dados?.nome || null,
         cpf: data.identificacao_dados?.contato || null, // Assuming contact often holds CPF/Email, check structure if needed
         contato: data.identificacao_dados?.contato || null,
+        bairro: data.endereco || null, // Mapping endereco to bairro for UI
         tipo: data.tipo?.toUpperCase() || "OUTROS",
         status: data.status?.toUpperCase() || "PENDENTE",
     };
@@ -187,11 +190,12 @@ export async function getManifestacaoByProtocolo(protocolo: string) {
 }
 
 export async function updateManifestacaoStatus(id: string, status: string) {
-    const supabase = await createClient();
+    // USING ADMIN CLIENT TO BYPASS RLS
+    const supabase = adminClient;
 
     const { error } = await supabase
         .from("manifestacoes")
-        .update({ status: status.toLowerCase() }) // DB uses lowercase
+        .update({ status: status }) // DB uses uppercase ENUM
         .eq("id", id);
 
     if (error) {
@@ -203,18 +207,16 @@ export async function updateManifestacaoStatus(id: string, status: string) {
 }
 
 export async function sendManifestacaoResponse(id: string, resposta: string, notas: string, status: string = "CONCLUIDO") {
-    const supabase = await createClient();
+    // USING ADMIN CLIENT TO BYPASS RLS
+    const supabase = adminClient;
 
     const updateData: any = {};
-    if (resposta) updateData.resposta_oficial = resposta;
-    if (notas) updateData.notas_internas = notas;
-    if (status) updateData.status = status.toLowerCase();
+    if (resposta !== undefined) updateData.resposta_oficial = resposta;
+    if (notas !== undefined) updateData.notas_internas = notas;
+    if (status) updateData.status = status; // DB uses uppercase ENUM
 
-    // Auto-mark as responded if there is a response
-    if (resposta) {
-        updateData.respondida = true;
-        updateData.data_resposta = new Date().toISOString();
-    }
+    // Update the updated_at timestamp
+    updateData.updated_at = new Date().toISOString();
 
     const { error } = await supabase
         .from("manifestacoes")

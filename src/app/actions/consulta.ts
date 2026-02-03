@@ -23,7 +23,9 @@ export async function getManifestacaoByProtocol(protocolo: string) {
                 status,
                 created_at,
                 updated_at,
-                anexos
+                anexos,
+                resposta_oficial,
+                satisfacao_resposta
             `)
             .eq("protocolo", protocolo.trim().toUpperCase())
             .single();
@@ -48,7 +50,9 @@ export async function getManifestacaoByProtocol(protocolo: string) {
                 tipo: data.tipo,
                 secretaria: data.secretaria,
                 relato: data.relato, // Decidir se mostramos o relato (público? sim, geralmente)
-                endereco: data.endereco
+                endereco: data.endereco,
+                resposta_oficial: data.resposta_oficial,
+                satisfacao_resposta: data.satisfacao_resposta
             }
         };
 
@@ -56,4 +60,27 @@ export async function getManifestacaoByProtocol(protocolo: string) {
         console.error("Erro inesperado na consulta:", e);
         return { success: false, error: "Erro interno no servidor." };
     }
+}
+
+export async function saveSatisfacaoResposta(protocolo: string, satisfacao: string) {
+    const supabase = await createClient();
+
+    // Validação
+    const validSatisfacoes = ["feliz", "normal", "chateado", "bravo"];
+    if (!validSatisfacoes.includes(satisfacao)) {
+        return { success: false, error: "Satisfação inválida." };
+    }
+
+    const { error } = await supabase
+        .from("manifestacoes")
+        .update({ satisfacao_resposta: satisfacao })
+        .eq("protocolo", protocolo.trim().toUpperCase())
+        .eq("status", "CONCLUIDO"); // Só permite se estiver concluído
+
+    if (error) {
+        console.error("Erro ao salvar satisfação:", error);
+        return { success: false, error: "Erro ao salvar avaliação." };
+    }
+
+    return { success: true };
 }

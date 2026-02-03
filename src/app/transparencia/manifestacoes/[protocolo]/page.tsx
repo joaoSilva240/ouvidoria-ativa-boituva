@@ -239,7 +239,7 @@ export default function ManifestacaoDetailsPage() {
                                 <span className="text-2xl">📝</span> Relato do Cidadão
                             </h2>
                             <div className="prose prose-slate max-w-none text-grafite/80 leading-relaxed bg-slate-50 p-6 rounded-xl border border-slate-100">
-                                {manifestacao.descricao}
+                                {manifestacao.relato}
                             </div>
                         </div>
 
