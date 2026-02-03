@@ -97,7 +97,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             .from("manifestacoes")
             .select("*", { count: "exact", head: true })
             .gte("created_at", startDate.toISOString())
-            .eq("respondida", true);
+            .eq("status", "CONCLUIDO");
 
         const taxaRespostaNum = totalManifestacoes && totalManifestacoes > 0
             ? Math.round((respondidas! / totalManifestacoes) * 100)
@@ -105,19 +105,18 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
         const taxaResposta = `${taxaRespostaNum}%`;
 
         // 5. Tempo médio de resposta REAL
-        const { data: manifestacoesRespondidas } = await supabase
+        const { data: manifestacoesConcluidas } = await supabase
             .from("manifestacoes")
-            .select("created_at, data_resposta")
+            .select("created_at, updated_at")
             .gte("created_at", startDate.toISOString())
-            .eq("respondida", true)
-            .not("data_resposta", "is", null);
+            .eq("status", "CONCLUIDO");
 
         let tempoMedio = "N/A";
-        if (manifestacoesRespondidas && manifestacoesRespondidas.length > 0) {
-            const temposTotais = manifestacoesRespondidas.map((m) => {
+        if (manifestacoesConcluidas && manifestacoesConcluidas.length > 0) {
+            const temposTotais = manifestacoesConcluidas.map((m) => {
                 const criacao = new Date(m.created_at);
-                const resposta = new Date(m.data_resposta!);
-                return (resposta.getTime() - criacao.getTime()) / (1000 * 60 * 60 * 24); // Converter para dias
+                const conclusao = new Date(m.updated_at);
+                return (conclusao.getTime() - criacao.getTime()) / (1000 * 60 * 60 * 24); // Converter para dias
             });
 
             const mediaEmDias = temposTotais.reduce((a, b) => a + b, 0) / temposTotais.length;
