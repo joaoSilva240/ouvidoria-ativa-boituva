@@ -58,10 +58,19 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             "informacao": "#0EA5E9",  // Azul Céu
         };
 
+        // Mapeamento de nomes com acentuação correta
+        const nomesTipos: Record<string, string> = {
+            "elogio": "Elogio",
+            "sugestao": "Sugestão",
+            "reclamacao": "Reclamação",
+            "denuncia": "Denúncia",
+            "informacao": "Informação",
+        };
+
         const distribuicaoPorTipo = Object.entries(tipoCounts).map(([tipo, count]) => ({
-            name: tipo.charAt(0) + tipo.slice(1).toLowerCase(),
+            name: nomesTipos[tipo.toLowerCase()] || tipo.charAt(0).toUpperCase() + tipo.slice(1).toLowerCase(),
             value: count,
-            color: colorMap[tipo] || "#0EA5E9",
+            color: colorMap[tipo.toLowerCase()] || "#0EA5E9",
         }));
 
         // 3. Distribuição por secretaria
