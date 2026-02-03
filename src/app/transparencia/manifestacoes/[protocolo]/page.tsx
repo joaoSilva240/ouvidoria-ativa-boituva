@@ -334,7 +334,7 @@ export default function ManifestacaoDetailsPage() {
 
                                 <button
                                     onClick={handleFinish}
-                                    disabled={isFinishing}
+                                    disabled={isFinishing || !resposta.trim()}
                                     className="w-full bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isFinishing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
