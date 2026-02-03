@@ -210,8 +210,13 @@ export async function sendManifestacaoResponse(id: string, resposta: string, not
     // USING ADMIN CLIENT TO BYPASS RLS
     const supabase = adminClient;
 
+    // Validação: não permitir CONCLUIDO sem resposta válida
+    if (status === "CONCLUIDO" && (!resposta || resposta.trim() === "")) {
+        throw new Error("Não é possível concluir sem uma resposta oficial válida.");
+    }
+
     const updateData: any = {};
-    if (resposta !== undefined) updateData.resposta_oficial = resposta;
+    if (resposta !== undefined) updateData.resposta_oficial = resposta.trim();
     if (notas !== undefined) updateData.notas_internas = notas;
     if (status) updateData.status = status; // DB uses uppercase ENUM
 
