@@ -125,23 +125,25 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
                 : `${Math.round(mediaEmDias)} dia${Math.round(mediaEmDias) !== 1 ? 's' : ''}`;
         }
 
-        // 6. Nível de satisfação REAL (baseado no campo humor)
-        const { data: humorData } = await supabase
+        // 6. Nível de satisfação REAL (baseado na satisfação pós-resposta)
+        const { data: satisfacaoData } = await supabase
             .from("manifestacoes")
-            .select("humor")
+            .select("satisfacao_resposta")
             .gte("created_at", startDate.toISOString())
-            .not("humor", "is", null);
+            .eq("status", "CONCLUIDO")
+            .not("satisfacao_resposta", "is", null);
 
         let nivelSatisfacao = "N/A";
-        if (humorData && humorData.length > 0) {
-            const humorMap: Record<string, number> = {
-                "FELIZ": 5,
-                "NEUTRO": 3,
-                "TRISTE": 1,
+        if (satisfacaoData && satisfacaoData.length > 0) {
+            const satisfacaoMap: Record<string, number> = {
+                "feliz": 5,
+                "normal": 3,
+                "chateado": 2,
+                "bravo": 1,
             };
 
-            const notas = humorData
-                .map((h) => humorMap[h.humor] || 3)
+            const notas = satisfacaoData
+                .map((s) => satisfacaoMap[s.satisfacao_resposta] || 3)
                 .filter((nota) => nota !== undefined);
 
             if (notas.length > 0) {

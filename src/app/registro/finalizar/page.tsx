@@ -6,7 +6,7 @@ import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { saveManifestacao } from "@/app/actions/manifestacao";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
-import { SentimentWidget } from "@/components/SentimentWidget";
+
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { useRouter } from "next/navigation";
@@ -17,7 +17,7 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function FinalizarPage() {
-    const { data, setHumor } = useManifestacao();
+    const { data } = useManifestacao();
     const [agreed, setAgreed] = useState(false);
     const [loading, setLoading] = useState(false);
     const [successData, setSuccessData] = useState<{ protocolo: string } | null>(null);
@@ -217,10 +217,7 @@ export default function FinalizarPage() {
                     </label>
                 </div>
 
-                {/* Sentiment Widget */}
-                <div className="w-full flex justify-center mb-12">
-                    <SentimentWidget value={data.humor} onChange={setHumor} />
-                </div>
+
 
                 {/* Rodapé Institucional */}
                 <footer className="w-full bg-white rounded-[40px] shadow-sm p-16 border border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-16">
