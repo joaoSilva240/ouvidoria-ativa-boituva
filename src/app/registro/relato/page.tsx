@@ -8,12 +8,8 @@ import { FormSelect } from "@/components/wizard/FormSelect";
 import { FormInput } from "@/components/wizard/FormInput";
 import { useRouter } from "next/navigation";
 import { useManifestacao } from "@/contexts/ManifestacaoContext";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 const secretariats = [
     "Administração e Equipamentos Públicos",

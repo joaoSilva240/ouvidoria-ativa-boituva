@@ -1,12 +1,8 @@
 "use client";
 
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { LucideIcon } from "lucide-react";
+import { cn } from "@/utils/cn";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     label: string;

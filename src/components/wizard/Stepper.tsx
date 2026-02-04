@@ -1,12 +1,8 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 const steps = [
     { id: 1, label: "Identificação" },

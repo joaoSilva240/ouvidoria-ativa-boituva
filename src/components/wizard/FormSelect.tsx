@@ -1,12 +1,8 @@
 "use client";
 
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { LucideIcon, ChevronDown } from "lucide-react";
+import { cn } from "@/utils/cn";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 interface FormSelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
     label: string;
