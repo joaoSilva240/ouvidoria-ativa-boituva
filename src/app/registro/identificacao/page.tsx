@@ -1,30 +1,77 @@
 "use client";
 
-import { useState } from "react";
-import { User, EyeOff, Mail, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
-import { FormInput } from "@/components/wizard/FormInput";
 import { useRouter } from "next/navigation";
 import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { createClient } from "@/utils/supabase/client";
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
+interface UserProfile {
+    nome: string;
+    cpf: string;
+    email: string;
+    telefone: string;
+}
+
 export default function IdentificacaoPage() {
     const { data, setIdentificacao } = useManifestacao();
     const [mode, setMode] = useState<"identificado" | "anonimo">(data.identificacao.mode);
-    const [nome, setNome] = useState(data.identificacao.nome);
-    const [contato, setContato] = useState(data.identificacao.contato);
+    const [profile, setProfile] = useState<UserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
+    // Buscar dados do perfil do usuário logado
+    useEffect(() => {
+        async function fetchProfile() {
+            const supabase = createClient();
+            const { data: { user } } = await supabase.auth.getUser();
+
+            if (user) {
+                const { data: profileData } = await supabase
+                    .from("profiles")
+                    .select("nome, cpf, email, telefone")
+                    .eq("id", user.id)
+                    .single();
+
+                if (profileData) {
+                    setProfile(profileData);
+                }
+            }
+            setLoading(false);
+        }
+
+        fetchProfile();
+    }, []);
+
     const handleContinue = () => {
-        setIdentificacao({ mode, nome: mode === 'identificado' ? nome : '', contato: mode === 'identificado' ? contato : '' });
+        if (mode === "identificado" && profile) {
+            setIdentificacao({
+                mode,
+                nome: profile.nome,
+                contato: profile.email || profile.telefone || "",
+            });
+        } else {
+            setIdentificacao({ mode: "anonimo", nome: "", contato: "" });
+        }
         router.push("/registro/categoria");
     };
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh]">
+                <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                <p className="mt-4 text-slate-500">Carregando seus dados...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center max-w-5xl mx-auto">
@@ -80,7 +127,7 @@ export default function IdentificacaoPage() {
                 </button>
             </div>
 
-            {/* Formulário */}
+            {/* Conteúdo baseado no modo */}
             <motion.div
                 layout
                 className="bg-white rounded-[40px] shadow-xl p-12 w-full flex flex-col gap-8 border border-slate-100"
@@ -92,23 +139,38 @@ export default function IdentificacaoPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            className="flex flex-col gap-8"
+                            className="space-y-6"
                         >
-                            <FormInput
-                                label="Nome Completo"
-                                placeholder="Toque para digitar seu nome"
-                                icon={User}
-                                value={nome}
-                                onChange={(e) => setNome(e.target.value)}
-                            />
-                            <FormInput
-                                label="E-mail ou Telefone"
-                                placeholder="exemplo@email.com ou (15) 99999-9999"
-                                icon={Mail}
-                                className="bg-slate-50/50"
-                                value={contato}
-                                onChange={(e) => setContato(e.target.value)}
-                            />
+                            <div className="text-center mb-6">
+                                <p className="text-lg text-grafite/60">
+                                    Seus dados cadastrais serão vinculados a esta manifestação:
+                                </p>
+                            </div>
+
+                            {profile ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Nome</p>
+                                        <p className="text-lg font-bold text-grafite">{profile.nome}</p>
+                                    </div>
+                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">CPF</p>
+                                        <p className="text-lg font-bold text-grafite">{profile.cpf}</p>
+                                    </div>
+                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">E-mail</p>
+                                        <p className="text-lg font-bold text-grafite">{profile.email}</p>
+                                    </div>
+                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Telefone</p>
+                                        <p className="text-lg font-bold text-grafite">{profile.telefone || "Não informado"}</p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-slate-400">
+                                    Não foi possível carregar seus dados. Tente novamente.
+                                </div>
+                            )}
                         </motion.div>
                     ) : (
                         <motion.div
@@ -128,7 +190,8 @@ export default function IdentificacaoPage() {
                 <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={handleContinue}
-                    className="w-full h-20 bg-primary text-white rounded-[24px] text-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/20 mt-4 transition-transform hover:brightness-105"
+                    disabled={mode === "identificado" && !profile}
+                    className="w-full h-20 bg-primary text-white rounded-[24px] text-2xl font-bold flex items-center justify-center gap-3 shadow-lg shadow-primary/20 mt-4 transition-transform hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     Continuar
                     <ArrowRight className="w-8 h-8" />
