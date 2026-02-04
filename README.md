@@ -49,12 +49,20 @@ graph TB
     style DB fill:#3ECF8E,stroke:#000,color:#fff
 ```
 
+
 ### Key Integrations
 - **Frontend**: Next.js 16 (App Router, Turbopack) with client-side interactivity via Framer Motion.
 - **Backend Logic**: Server Actions handle form submissions, validation, and authentication.
 - **Database**: Supabase PostgreSQL with Row Level Security (RLS).
 - **Auth**: JWT-based authentication with role-based access control (ADMIN/COMUM).
 - **Middleware**: `proxy.ts` for route protection and session management.
+
+### 🔒 Security & Privacy (LGPD Compliance)
+- **Row Level Security (RLS)**: Strictly enforced policies ensure users can only access their own data.
+    - *Exception*: Administrators have elevated privileges to view all manifestations for management purposes.
+- **Anonymous Reporting**: The system allows anonymous inserts (compliant with Ombudsman regulations). While unauthenticated users can write to the database, they have **zero read access** to other records.
+- **Data Isolation**: Profile data is isolated; users cannot list or view other users' profiles.
+
 
 ---
 

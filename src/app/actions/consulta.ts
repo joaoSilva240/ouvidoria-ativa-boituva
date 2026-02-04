@@ -12,7 +12,10 @@ export async function getManifestacaoByProtocol(protocolo: string) {
     try {
         const supabase = await createClient();
         const { data, error } = await supabase
-            .from("manifestacoes")
+            .rpc('get_manifestacao_details_by_protocol', {
+                p_protocolo: protocolo
+            })
+            // Mantemos a seleção de colunas para consistência e segurança adicional no retorno da API
             .select(`
                 id,
                 protocolo,
@@ -27,7 +30,6 @@ export async function getManifestacaoByProtocol(protocolo: string) {
                 resposta_oficial,
                 satisfacao_resposta
             `)
-            .eq("protocolo", protocolo.trim().toUpperCase())
             .single();
 
         if (error || !data) {
