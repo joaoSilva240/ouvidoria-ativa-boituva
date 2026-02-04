@@ -12,6 +12,8 @@ A modern and interactive web application developed for the **Municipal Governmen
 
 The project focuses on a **premium user experience (UX)**, featuring fluid design, smooth animations, and a guided flow (Wizard) that makes the process accessible to everyone.
 
+> **Latest Update (Feb 2026):** Full authentication system with JWT via Supabase Auth, role-based access control (ADMIN/COMUM), and a transparency dashboard for administrators.
+
 ---
 
 ## 🏗️ Architecture
@@ -28,11 +30,13 @@ graph TB
     
     subgraph "Server Layer (Next.js)"
         SA[Server Actions]
+        Proxy[proxy.ts Middleware]
     end
     
     subgraph "Data Layer (Supabase)"
-        Auth[Anonymous Auth]
-        DB[(PostgreSQL Database)]
+        Auth[Supabase Auth - JWT]
+        DB[(PostgreSQL + RLS)]
+        Profiles[(profiles table)]
     end
     
     User[👤 Citizen] --> UI
@@ -46,17 +50,23 @@ graph TB
 ```
 
 ### Key Integrations
-- **Frontend**: Next.js 16 (App Router) with client-side interactivity via Framer Motion.
-- **Backend Logic**: Server Actions handle form submissions and validation.
-- **Database**: Supabase PostgreSQL accessed directly via modern Server Actions.
+- **Frontend**: Next.js 16 (App Router, Turbopack) with client-side interactivity via Framer Motion.
+- **Backend Logic**: Server Actions handle form submissions, validation, and authentication.
+- **Database**: Supabase PostgreSQL with Row Level Security (RLS).
+- **Auth**: JWT-based authentication with role-based access control (ADMIN/COMUM).
+- **Middleware**: `proxy.ts` for route protection and session management.
 
 ---
 
 ## ✨ Key Features
 
-- **Guided Flow (Wizard)**: Step-by-step registration (Identification -> Category -> Report -> Finalization).
-- **Anonymous Authentication**: Allows citizens to register occurrences without account creation, ensuring data security and ease of access.
-- **Supabase Integration**: Secure and scalable data persistence using PostgreSQL.
+- **Guided Flow (Wizard)**: Step-by-step registration (Identification → Category → Report → Finalization).
+- **User Authentication**: Full login/register system with email/password via Supabase Auth (JWT).
+- **Role-Based Access**: ADMIN users access the Transparency Dashboard; COMUM users see only their own manifestations.
+- **Anonymous Option**: Citizens can still register occurrences anonymously if preferred.
+- **Transparency Dashboard**: Real-time statistics, charts (by type, department, timeline), and complete manifestation listing for admins.
+- **Satisfaction Survey**: Post-response feedback collection from citizens.
+- **Supabase Integration**: Secure and scalable data persistence using PostgreSQL with RLS.
 - **Responsive Design**: Interface optimized for desktops, tablets, and mobile devices.
 - **Interactive Animations**: Rich visual feedback using *Framer Motion*.
 
@@ -97,9 +107,12 @@ Create a `.env.local` file in the project root and add your Supabase project key
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_jwt_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # Required for admin operations
 ```
 
-> **Note:** Make sure to enable **"Anonymous Sign-ins"** in the Supabase dashboard (Authentication > Providers).
+> **Notes:**
+> - Enable **"Anonymous Sign-ins"** in Supabase Dashboard (Authentication → Providers) if using anonymous flow.
+> - The `SUPABASE_SERVICE_ROLE_KEY` is required for Server Actions that bypass RLS (admin operations). **Never expose this key client-side.**
 
 ### 4. Run the Project
 

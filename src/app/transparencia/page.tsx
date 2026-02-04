@@ -7,8 +7,9 @@ import { TypeChart } from "@/components/dashboard/TypeChart";
 import { DepartmentChart } from "@/components/dashboard/DepartmentChart";
 import { TimelineChart } from "@/components/dashboard/TimelineChart";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PageHeader } from "@/components/PageHeader";
 import { getDashboardData, DashboardStats } from "@/app/actions/dashboard";
-import Image from "next/image";
 import Link from "next/link";
 
 const filterOptions = [
@@ -33,35 +34,12 @@ export default function TransparenciaPage() {
     }, [activeFilter]);
 
     if (loading || !stats) {
-        return (
-            <div className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-100 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-4 border-primary"></div>
-                    <p className="mt-4 text-grafite font-semibold text-lg">Carregando dados...</p>
-                </div>
-            </div>
-        );
+        return <LoadingSpinner message="Carregando dados..." />;
     }
 
     return (
         <main className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-100 py-8 px-6">
-            {/* Header */}
-            <header className="flex flex-col items-center gap-4 mb-8">
-                <div className="flex flex-col items-center">
-                    <Image
-                        src="/logo-boituva.png"
-                        alt="Boituva"
-                        width={400}
-                        height={120}
-                        priority
-                        className="h-20 w-auto mb-2"
-                    />
-                    <p className="text-grafite/50 text-xs font-semibold tracking-[0.3em]">OUVIDORIA DIGITAL</p>
-                </div>
-                <h1 className="text-4xl font-extrabold text-grafite text-center">
-                    Transparência Boituva
-                </h1>
-            </header>
+            <PageHeader title="Transparência Boituva" />
 
             {/* Stats Grid */}
             <section className="max-w-7xl mx-auto mb-8">

@@ -6,15 +6,10 @@ import { useManifestacao } from "@/contexts/ManifestacaoContext";
 import { saveManifestacao } from "@/app/actions/manifestacao";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
-
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 export default function FinalizarPage() {
     const { data } = useManifestacao();

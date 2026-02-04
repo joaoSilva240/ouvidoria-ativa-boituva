@@ -6,13 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
 import { useRouter } from "next/navigation";
 import { useManifestacao } from "@/contexts/ManifestacaoContext";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 import { createClient } from "@/utils/supabase/client";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 interface UserProfile {
     nome: string;

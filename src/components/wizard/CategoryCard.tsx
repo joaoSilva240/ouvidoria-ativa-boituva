@@ -2,12 +2,8 @@
 
 import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
 
 interface CategoryCardProps {
     label: string;
