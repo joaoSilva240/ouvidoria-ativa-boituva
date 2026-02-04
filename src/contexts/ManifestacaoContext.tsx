@@ -1,8 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import { HumorType } from "@/components/SentimentWidget";
 
 export type Identificacao = {
@@ -87,29 +85,6 @@ export function ManifestacaoProvider({ children }: { children: ReactNode }) {
     const reset = () => {
         setData(defaultData);
     };
-
-    // Autenticação Anônima Automática
-    const router = useRouter(); // Hook do Next.js
-
-    useEffect(() => {
-        const supabase = createClient();
-
-        async function authenticate() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                console.log("Iniciando sessão anônima...");
-                const { error } = await supabase.auth.signInAnonymously();
-                if (error) {
-                    console.error("Erro ao autenticar anonimamente:", error);
-                } else {
-                    console.log("Sessão anônima criada. Atualizando router...");
-                    router.refresh(); // FORÇA O SERVIDOR A LER O NOVO COOKIE
-                }
-            }
-        }
-
-        authenticate();
-    }, [router]);
 
     return (
         <ManifestacaoContext.Provider

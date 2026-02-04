@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Plus, Search, BarChart3, Check } from "lucide-react";
+import { Plus, Search, BarChart3, Check, LogOut } from "lucide-react";
 import Image from "next/image";
 
 import { ActionCard } from "@/components/ActionCard";
@@ -38,7 +38,26 @@ export default function LandingPage() {
             {/* Left Column - Actions (50%) */}
             <div className="w-full lg:w-1/2 flex flex-col justify-between py-12 px-8 lg:px-16 overflow-y-auto bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-50">
                 {/* Header Section */}
-                <header className="flex flex-col items-center gap-6 mt-8">
+                <header className="flex flex-col items-center gap-6 mt-8 relative">
+                    <div className="absolute top-0 right-0 lg:right-auto lg:left-0 hidden">
+                        {/* Placeholder para posicionamento se necessário */}
+                    </div>
+
+                    <div className="w-full flex justify-end mb-4">
+                        <button
+                            onClick={() => {
+                                // Logout via fetch para evitar import de server action em client component
+                                fetch('/api/auth/signout', { method: 'POST' }).then(() => {
+                                    window.location.href = '/login';
+                                });
+                            }}
+                            className="flex items-center gap-2 text-slate-500 font-medium hover:bg-slate-100 px-4 py-2 rounded-full transition-colors"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sair</span>
+                        </button>
+                    </div>
+
                     <div className="flex flex-col items-center">
                         <Image
                             src="/logo-boituva.png"
