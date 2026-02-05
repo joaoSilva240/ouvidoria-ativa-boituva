@@ -54,6 +54,7 @@ graph TB
 - **Frontend**: Next.js 16 (App Router, Turbopack) with client-side interactivity via Framer Motion.
 - **Backend Logic**: Server Actions handle form submissions, validation, and authentication.
 - **Database**: Supabase PostgreSQL with Row Level Security (RLS).
+- **Caching**: Redis layer for high-performance data retrieval and rate limiting.
 - **Auth**: JWT-based authentication with role-based access control (ADMIN/COMUM).
 - **Middleware**: `proxy.ts` for route protection and session management.
 
@@ -86,6 +87,7 @@ graph TB
 - **[TypeScript](https://www.typescriptlang.org/)** - JavaScript superset for static typing and security.
 - **[Tailwind CSS v4](https://tailwindcss.com/)** - Utility-first CSS framework for rapid styling.
 - **[Supabase](https://supabase.com/)** - Backend-as-a-Service (Auth, Database, Storage).
+- **[Redis](https://redis.io/)** - In-memory data store for high-performance caching.
 - **[Framer Motion](https://www.framer.com/motion/)** - Animation library for React.
 - **[Lucide Icons](https://lucide.dev/)** - Lightweight and consistent vector icons.
 

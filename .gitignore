@@ -45,3 +45,8 @@ yarn-error.log*
 /execucoes/
 To-do.md
 *.tmp
+
+# Temporary test scripts (may contain credentials)
+test-*.mjs
+verify-*.mjs
+*.test.local.*
