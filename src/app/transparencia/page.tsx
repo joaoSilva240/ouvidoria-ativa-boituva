@@ -1,115 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BarChart3, MessageSquare, Clock, ThumbsUp } from "lucide-react";
-import { StatCard } from "@/components/dashboard/StatCard";
-import { TypeChart } from "@/components/dashboard/TypeChart";
-import { DepartmentChart } from "@/components/dashboard/DepartmentChart";
-import { TimelineChart } from "@/components/dashboard/TimelineChart";
-import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
-import { PageHeader } from "@/components/PageHeader";
-import { getDashboardData, DashboardStats } from "@/app/actions/dashboard";
-import Link from "next/link";
+import { useState } from "react";
+import { BarChart3, ClipboardList } from "lucide-react";
+import { Navbar } from "@/components/Navbar";
+import { DashboardTab } from "./components/DashboardTab";
+import { ManifestacoesTab } from "./components/ManifestacoesTab";
 
-const filterOptions = [
-    { label: "Últimos 30 dias", value: "30dias" },
-    { label: "Este Ano", value: "ano" },
-    { label: "Total", value: "total" },
-];
+type Tab = "dashboard" | "manifestacoes";
+
+interface TabButtonProps {
+    active: boolean;
+    onClick: () => void;
+    icon: React.ReactNode;
+    children: React.ReactNode;
+}
+
+function TabButton({ active, onClick, icon, children }: TabButtonProps) {
+    return (
+        <button
+            onClick={onClick}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${active
+                    ? "bg-primary text-white shadow-md"
+                    : "text-grafite hover:bg-slate-100"
+                }`}
+        >
+            {icon}
+            {children}
+        </button>
+    );
+}
 
 export default function TransparenciaPage() {
-    const [activeFilter, setActiveFilter] = useState("30dias");
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            const data = await getDashboardData(activeFilter);
-            setStats(data);
-            setLoading(false);
-        }
-        fetchData();
-    }, [activeFilter]);
-
-    if (loading || !stats) {
-        return <LoadingSpinner message="Carregando dados..." />;
-    }
+    const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
     return (
-        <main className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-100 py-8 px-6">
-            <PageHeader title="Transparência Boituva" />
+        <main className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-100">
+            <Navbar />
 
-            {/* Stats Grid */}
-            <section className="max-w-7xl mx-auto mb-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard
-                        icon={MessageSquare}
-                        label="Total de Manifestações"
-                        value={stats.totalManifestacoes.toLocaleString()}
-                        color="primary"
-                    />
-                    <StatCard
-                        icon={BarChart3}
-                        label="Taxa de Resposta"
-                        value={stats.taxaResposta}
-                        color="green"
-                    />
-                    <StatCard
-                        icon={Clock}
-                        label="Tempo Médio"
-                        value={stats.tempoMedio}
-                        color="primary"
-                    />
-                    <StatCard
-                        icon={ThumbsUp}
-                        label="Nível de Satisfação"
-                        value={stats.nivelSatisfacao}
-                        color="yellow"
-                    />
-                </div>
-            </section>
-
-            {/* Timeline Chart */}
-            <section className="max-w-7xl mx-auto mb-8">
-                <TimelineChart data={stats.evolucaoTemporal} periodo={activeFilter} />
-            </section>
-
-            {/* Charts Section */}
-            <section className="max-w-7xl mx-auto mb-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <TypeChart data={stats.distribuicaoPorTipo} />
-                    <DepartmentChart data={stats.distribuicaoPorSecretaria} />
-                </div>
-            </section>
-
-            {/* Filters */}
-            <section className="max-w-7xl mx-auto mb-8">
-                <DashboardFilters
-                    filters={filterOptions}
-                    activeFilter={activeFilter}
-                    onFilterChange={setActiveFilter}
-                />
-            </section>
-
-            {/* Back Button */}
-            <footer className="max-w-7xl mx-auto text-center space-y-4">
-                <Link
-                    href="/transparencia/manifestacoes"
-                    className="inline-block bg-primary text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-primary/90 transition-colors"
-                >
-                    Ver Todas as Manifestações
-                </Link>
-                <div>
-                    <Link
-                        href="/"
-                        className="inline-block bg-grafite text-white px-8 py-4 rounded-full font-semibold text-lg hover:bg-grafite/90 transition-colors"
+            {/* Tab Navigation */}
+            <div className="max-w-7xl mx-auto px-6 pt-6">
+                <div className="flex gap-2 bg-white rounded-2xl p-2 shadow-sm w-fit">
+                    <TabButton
+                        active={activeTab === "dashboard"}
+                        onClick={() => setActiveTab("dashboard")}
+                        icon={<BarChart3 className="w-5 h-5" />}
                     >
-                        Voltar ao Início
-                    </Link>
+                        Dashboard
+                    </TabButton>
+                    <TabButton
+                        active={activeTab === "manifestacoes"}
+                        onClick={() => setActiveTab("manifestacoes")}
+                        icon={<ClipboardList className="w-5 h-5" />}
+                    >
+                        Manifestações
+                    </TabButton>
                 </div>
-            </footer>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === "dashboard" ? <DashboardTab /> : <ManifestacoesTab />}
         </main>
     );
 }

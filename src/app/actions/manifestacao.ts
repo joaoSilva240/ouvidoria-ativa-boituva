@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { ManifestacaoData } from "@/contexts/ManifestacaoContext";
 import { redirect } from "next/navigation";
+import { invalidatePattern } from "@/utils/redis";
 
 function generateProtocol() {
     const year = new Date().getFullYear();
@@ -48,6 +49,12 @@ export async function saveManifestacao(data: ManifestacaoData) {
             console.error("Erro ao salvar no Supabase:", error);
             return { success: false, error: "Erro ao salvar a manifestação. Tente novamente." };
         }
+
+        // Invalidar cache do dashboard para refletir novos números
+        await invalidatePattern("dashboard:stats:*");
+
+        // Invalidar cache da listagem
+        await invalidatePattern("manifestacoes:list:*");
 
         return { success: true, protocolo: protocolo };
     } catch (e) {

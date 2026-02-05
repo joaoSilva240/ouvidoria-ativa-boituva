@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
+import { getOrSet } from "@/utils/redis";
 
 export interface DashboardStats {
     totalManifestacoes: number;
@@ -13,26 +14,30 @@ export interface DashboardStats {
 }
 
 export async function getDashboardData(periodo: string): Promise<DashboardStats> {
-    const supabase = await createClient();
+    const cacheKey = `dashboard:stats:${periodo}`;
 
-    // Calcular data de início baseado no período
-    const now = new Date();
-    let startDate = new Date();
+    // Cache por 10 minutos (600 segundos) para não sobrecarregar o banco
+    return await getOrSet(cacheKey, async () => {
+        const supabase = await createClient();
 
-    switch (periodo) {
-        case "30dias":
-            startDate.setDate(now.getDate() - 30);
-            break;
-        case "ano":
-            startDate.setMonth(0, 1); // 1º de janeiro do ano atual
-            break;
-        case "total":
-        default:
-            startDate = new Date(2020, 0, 1); // Data arbitrária antiga
-            break;
-    }
+        // Calcular data de início baseado no período
+        const now = new Date();
+        let startDate = new Date();
 
-    try {
+        switch (periodo) {
+            case "30dias":
+                startDate.setDate(now.getDate() - 30);
+                break;
+            case "ano":
+                startDate.setMonth(0, 1); // 1º de janeiro do ano atual
+                break;
+            case "total":
+            default:
+                startDate = new Date(2020, 0, 1); // Data arbitrária antiga
+                break;
+        }
+
+
         // 1. Total de manifestações no período
         const { count: totalManifestacoes } = await supabase
             .from("manifestacoes")
@@ -89,8 +94,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
                 name: secretaria,
                 manifestacoes: count,
             }))
-            .sort((a, b) => b.manifestacoes - a.manifestacoes)
-            .slice(0, 5); // Top 5 secretarias
+            .sort((a, b) => b.manifestacoes - a.manifestacoes);
 
         // 4. Taxa de resposta REAL
         const { count: respondidas } = await supabase
@@ -208,18 +212,5 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             distribuicaoPorSecretaria,
             evolucaoTemporal,
         };
-    } catch (error) {
-        console.error("Erro ao buscar dados do dashboard:", error);
-
-        // Retornar dados vazios em caso de erro
-        return {
-            totalManifestacoes: 0,
-            taxaResposta: "0%",
-            tempoMedio: "N/A",
-            nivelSatisfacao: "N/A",
-            distribuicaoPorTipo: [],
-            distribuicaoPorSecretaria: [],
-            evolucaoTemporal: [],
-        };
-    }
+    }, { ttl: 600 }); // Fim do getOrSet
 }

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/utils/supabase/server";
-import { getOrSet, invalidateCache } from "@/utils/redis";
+import { getOrSet, invalidateCache, invalidatePattern } from "@/utils/redis";
 
 const MANIFESTACAO_CACHE_TTL = 300; // 5 minutos
 
@@ -107,6 +107,8 @@ export async function saveSatisfacaoResposta(protocolo: string, satisfacao: stri
 
     // Invalidar cache para que update apareça imediatamente
     await invalidateCache(`manifestacao:${normalizedProtocolo}`);
+    await invalidatePattern("dashboard:stats:*");
+    await invalidatePattern("manifestacoes:list:*");
 
     return { success: true };
 }

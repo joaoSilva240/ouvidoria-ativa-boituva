@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { adminClient } from "@/utils/supabase/admin";
+import { invalidatePattern, getOrSet } from "@/utils/redis";
 
 export interface ManifestacaoListItem {
     id: number;
@@ -32,71 +33,107 @@ export async function getManifestacoes(
     page: number = 1,
     perPage: number = 10
 ): Promise<ManifestacaoListResponse> {
-    const supabase = await createClient();
+    // Gerar chave de cache única baseada nos parâmetros
+    const filtersKey = JSON.stringify(filters);
+    const cacheKey = `manifestacoes:list:${filtersKey}:p${page}:l${perPage}`;
 
-    try {
-        // Build query
-        let query = supabase
-            .from("manifestacoes")
-            .select("id, protocolo, created_at, identificacao_dados, tipo, secretaria, status", { count: "exact" });
+    return await getOrSet(cacheKey, async () => {
+        const supabase = await createClient();
 
-        // Apply search filter (protocolo, nome, or cpf/contato)
-        if (filters.search && filters.search.trim()) {
-            const searchTerm = filters.search.trim();
-            query = query.or(`protocolo.ilike.%${searchTerm}%,identificacao_dados->>nome.ilike.%${searchTerm}%,identificacao_dados->>contato.ilike.%${searchTerm}%`);
-        }
+        try {
+            // Build query
+            let query = supabase
+                .from("manifestacoes")
+                .select("id, protocolo, created_at, identificacao_dados, tipo, secretaria, status", { count: "exact" });
 
-        // Apply tipo filter
-        if (filters.tipo && filters.tipo !== "TODOS") {
-            // Cuidado: filtros.tipo vem em UPPERCASE da UI, mas no DB pode estar em lowercase
-            query = query.ilike("tipo", filters.tipo);
-        }
-
-        // Apply secretaria filter
-        if (filters.secretaria && filters.secretaria !== "TODAS") {
-            query = query.eq("secretaria", filters.secretaria);
-        }
-
-        // Apply identidade filter
-        if (filters.identidade && filters.identidade !== "TODOS") {
-            if (filters.identidade === "ANONIMO") {
-                query = query.eq("identificacao_dados->>mode", "anonimo");
-            } else if (filters.identidade === "IDENTIFICADO") {
-                query = query.eq("identificacao_dados->>mode", "identificado");
-            }
-        }
-
-        // ... (resto do código de período se mantém igual)
-        if (filters.periodo && filters.periodo !== "TOTAL") {
-            const now = new Date();
-            let startDate = new Date();
-
-            switch (filters.periodo) {
-                case "7DIAS":
-                    startDate.setDate(now.getDate() - 7);
-                    break;
-                case "30DIAS":
-                    startDate.setDate(now.getDate() - 30);
-                    break;
-                case "ANO":
-                    startDate.setMonth(0, 1);
-                    break;
+            // Apply search filter (protocolo, nome, or cpf/contato)
+            if (filters.search && filters.search.trim()) {
+                const searchTerm = filters.search.trim();
+                query = query.or(`protocolo.ilike.%${searchTerm}%,identificacao_dados->>nome.ilike.%${searchTerm}%,identificacao_dados->>contato.ilike.%${searchTerm}%`);
             }
 
-            query = query.gte("created_at", startDate.toISOString());
-        }
+            // Apply tipo filter
+            if (filters.tipo && filters.tipo !== "TODOS") {
+                // Cuidado: filtros.tipo vem em UPPERCASE da UI, mas no DB pode estar em lowercase
+                query = query.ilike("tipo", filters.tipo);
+            }
 
-        // Apply pagination
-        const start = (page - 1) * perPage;
-        const end = start + perPage - 1;
+            // Apply secretaria filter
+            if (filters.secretaria && filters.secretaria !== "TODAS") {
+                query = query.eq("secretaria", filters.secretaria);
+            }
 
-        // Execute query with ordering
-        const { data, error, count } = await query
-            .order("created_at", { ascending: false })
-            .range(start, end);
+            // Apply identidade filter
+            if (filters.identidade && filters.identidade !== "TODOS") {
+                if (filters.identidade === "ANONIMO") {
+                    query = query.eq("identificacao_dados->>mode", "anonimo");
+                } else if (filters.identidade === "IDENTIFICADO") {
+                    query = query.eq("identificacao_dados->>mode", "identificado");
+                }
+            }
 
-        if (error) {
-            console.error("Error fetching manifestacoes:", error);
+            // ... (resto do código de período se mantém igual)
+            if (filters.periodo && filters.periodo !== "TOTAL") {
+                const now = new Date();
+                let startDate = new Date();
+
+                switch (filters.periodo) {
+                    case "7DIAS":
+                        startDate.setDate(now.getDate() - 7);
+                        break;
+                    case "30DIAS":
+                        startDate.setDate(now.getDate() - 30);
+                        break;
+                    case "ANO":
+                        startDate.setMonth(0, 1);
+                        break;
+                }
+
+                query = query.gte("created_at", startDate.toISOString());
+            }
+
+            // Apply pagination
+            const start = (page - 1) * perPage;
+            const end = start + perPage - 1;
+
+            // Execute query with ordering
+            const { data, error, count } = await query
+                .order("created_at", { ascending: false })
+                .range(start, end);
+
+            if (error) {
+                console.error("Error fetching manifestacoes:", error);
+                return {
+                    data: [],
+                    total: 0,
+                    page,
+                    totalPages: 0,
+                };
+            }
+
+            // Map data to interface
+            const mappedData: ManifestacaoListItem[] = (data || []).map((item: any) => ({
+                id: item.id,
+                protocolo: item.protocolo,
+                created_at: item.created_at,
+                nome_cidadao: item.identificacao_dados?.nome || null,
+                cpf: item.identificacao_dados?.contato || null, // No context de Boituva, contato costuma ser o CPF/email
+                tipo: item.tipo,
+                secretaria: item.secretaria,
+                status: item.status,
+            }));
+
+            const total = count || 0;
+            const totalPages = Math.ceil(total / perPage);
+
+            return {
+                data: mappedData,
+                total,
+                page,
+                totalPages,
+            };
+        } catch (e) {
+            console.error("Unexpected error fetching manifestacoes:", e);
             return {
                 data: [],
                 total: 0,
@@ -104,37 +141,7 @@ export async function getManifestacoes(
                 totalPages: 0,
             };
         }
-
-        // Map data to interface
-        const mappedData: ManifestacaoListItem[] = (data || []).map((item: any) => ({
-            id: item.id,
-            protocolo: item.protocolo,
-            created_at: item.created_at,
-            nome_cidadao: item.identificacao_dados?.nome || null,
-            cpf: item.identificacao_dados?.contato || null, // No context de Boituva, contato costuma ser o CPF/email
-            tipo: item.tipo,
-            secretaria: item.secretaria,
-            status: item.status,
-        }));
-
-        const total = count || 0;
-        const totalPages = Math.ceil(total / perPage);
-
-        return {
-            data: mappedData,
-            total,
-            page,
-            totalPages,
-        };
-    } catch (e) {
-        console.error("Unexpected error fetching manifestacoes:", e);
-        return {
-            data: [],
-            total: 0,
-            page,
-            totalPages: 0,
-        };
-    }
+    }, { ttl: 300 }); // Fim do getOrSet
 }
 
 // Get unique secretarias for filter dropdown
@@ -203,6 +210,11 @@ export async function updateManifestacaoStatus(id: string, status: string) {
         throw new Error("Failed to update status");
     }
 
+    // Invalidar cache do dashboard
+    await invalidatePattern("dashboard:stats:*");
+    // Invalidar listagem
+    await invalidatePattern("manifestacoes:list:*");
+
     return { success: true };
 }
 
@@ -232,6 +244,11 @@ export async function sendManifestacaoResponse(id: string, resposta: string, not
         console.error("Error sending response:", error);
         throw new Error("Failed to send response");
     }
+
+    // Invalidar cache do dashboard
+    await invalidatePattern("dashboard:stats:*");
+    // Invalidar listagem
+    await invalidatePattern("manifestacoes:list:*");
 
     return { success: true };
 }
