@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { WizardHeader } from "@/components/wizard/WizardHeader";
+import { Navbar } from "@/components/Navbar";
 import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getManifestacaoByProtocol, saveSatisfacaoResposta } from "@/app/actions/consulta";
@@ -81,7 +81,7 @@ export default function ConsultaPage() {
 
     return (
         <div className="min-h-screen bg-offwhite font-sans text-grafite flex flex-col">
-            <WizardHeader />
+            <Navbar />
 
             <main className="flex-1 flex flex-col items-center pt-20 px-8 pb-32 max-w-4xl mx-auto w-full">
 

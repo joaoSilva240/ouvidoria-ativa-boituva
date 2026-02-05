@@ -1,4 +1,4 @@
-import { WizardHeader } from "@/components/wizard/WizardHeader";
+import { Navbar } from "@/components/Navbar";
 import { ManifestacaoProvider } from "@/contexts/ManifestacaoContext";
 
 export default function WizardLayout({
@@ -9,7 +9,7 @@ export default function WizardLayout({
     return (
         <ManifestacaoProvider>
             <div className="min-h-screen bg-slate-50">
-                <WizardHeader />
+                <Navbar />
                 <main className="container mx-auto px-4 py-8">
                     {children}
                 </main>

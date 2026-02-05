@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, User, MapPin, Loader2, Send, CheckCircle, AlertCircle } from "lucide-react";
+import { User, MapPin, Loader2, Send, CheckCircle, AlertCircle } from "lucide-react";
 import { motion } from "framer-motion";
+import { Navbar } from "@/components/Navbar";
 
 import { getManifestacaoByProtocolo, updateManifestacaoStatus, sendManifestacaoResponse } from "@/app/actions/manifestacoes";
 
@@ -154,17 +154,10 @@ export default function ManifestacaoDetailsPage() {
     }
 
     return (
-        <main className="min-h-screen bg-slate-50 py-8 px-4 lg:px-8">
-            <div className="max-w-7xl mx-auto">
+        <main className="min-h-screen bg-slate-50">
+            <Navbar backHref="/transparencia" />
 
-                {/* Back Button */}
-                <Link
-                    href="/transparencia/manifestacoes"
-                    className="flex items-center gap-2 text-grafite/60 hover:text-primary mb-6 transition-colors w-fit"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                    Voltar para a lista
-                </Link>
+            <div className="max-w-7xl mx-auto py-8 px-4 lg:px-8">
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
