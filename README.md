@@ -4,6 +4,7 @@
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Framer Motion](https://img.shields.io/badge/Framer-Black?style=for-the-badge&logo=framer&logoColor=blue)
 
 ![Application Screenshot](docs/screenshots/tela-inicial.png)
@@ -18,7 +19,7 @@ The project focuses on a **premium user experience (UX)**, featuring fluid desig
 
 ## 🏗️ Architecture
 
-The application follows a modern three-tier architecture, leveraging Server Actions for secure backend communication and Supabase for robust data persistence.
+The application follows a modern four-tier architecture, leveraging Server Actions for secure backend communication, Redis for high-performance caching, and Supabase for robust data persistence.
 
 ```mermaid
 graph TB
@@ -31,6 +32,11 @@ graph TB
     subgraph "Server Layer (Next.js)"
         SA[Server Actions]
         Proxy[proxy.ts Middleware]
+        Cache[Redis Client]
+    end
+    
+    subgraph "Cache Layer (Redis)"
+        RC[(Redis Cloud)]
     end
     
     subgraph "Data Layer (Supabase)"
@@ -42,10 +48,14 @@ graph TB
     User[👤 Citizen] --> UI
     UI --> Router
     Router --> SA
+    SA --> Cache
+    Cache -.->|Cache Hit| SA
+    Cache -->|Cache Miss| DB
     SA --> DB
     Auth -.-> SA
     
     style UI fill:#000,stroke:#fff,color:#fff
+    style Cache fill:#DC382D,stroke:#fff,color:#fff
     style DB fill:#3ECF8E,stroke:#000,color:#fff
 ```
 
@@ -115,9 +125,13 @@ npm install
 Create a `.env.local` file in the project root and add your Supabase project keys:
 
 ```env
+# Supabase
 NEXT_PUBLIC_SUPABASE_URL=your_project_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_public_anon_jwt_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key  # Required for admin operations
+
+# Redis (Optional - enables caching)
+REDIS_URL=redis://default:password@host:port
 ```
 
 > **Notes:**
