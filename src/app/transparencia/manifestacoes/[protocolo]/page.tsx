@@ -9,7 +9,7 @@ import { Navbar } from "@/components/Navbar";
 
 import { getManifestacaoByProtocolo, updateManifestacaoStatus, sendManifestacaoResponse } from "@/app/actions/manifestacoes";
 import { ChatMensagens } from "@/components/ChatMensagens";
-import { getMensagens, enviarMensagemOuvidor, TipoMensagem } from "@/app/actions/mensagens";
+import { getMensagens, enviarMensagemOuvidor, finalizarManifestacaoOuvidor, TipoMensagem } from "@/app/actions/mensagens";
 
 /* --------------------------------------------------------------------------------
    Constants & Colors
@@ -122,17 +122,23 @@ export default function ManifestacaoDetailsPage() {
 
     const handleFinish = async () => {
         if (!manifestacao) return;
-        const confirmed = confirm("Tem certeza que deseja finalizar este atendimento? Certifique-se de ter enviado uma resposta oficial através do chat.");
+        const confirmed = confirm("Tem certeza que deseja finalizar este atendimento?");
         if (!confirmed) return;
 
         setIsFinishing(true);
         try {
-            // Apenas atualiza status, a resposta deve ser via chat
-            await updateManifestacaoStatus(manifestacao.id, "CONCLUIDO");
+            // Usa action atômica que insere mensagem E atualiza status
+            await finalizarManifestacaoOuvidor(manifestacao.id);
             setStatus("CONCLUIDO");
+
+            // Recarrega para refletir bloqueio e nova mensagem
+            const msgs = await getMensagens(manifestacao.id, 'OUVIDOR');
+            setMensagens(msgs);
+
             alert("Atendimento finalizado com sucesso!");
-        } catch (error) {
-            alert("Erro ao finalizar.");
+        } catch (error: any) {
+            console.error(error);
+            alert("Erro ao finalizar: " + (error.message || "Erro desconhecido"));
         } finally {
             setIsFinishing(false);
         }
@@ -158,6 +164,8 @@ export default function ManifestacaoDetailsPage() {
         );
     }
 
+    const isReadOnly = status === 'CONCLUIDO' || status === 'ARQUIVADO';
+
     return (
         <main className="min-h-screen bg-slate-50">
             <Navbar backHref="/transparencia" />
@@ -168,6 +176,14 @@ export default function ManifestacaoDetailsPage() {
 
                     {/* LEFT COLUMN (2/3) - Details */}
                     <div className="lg:col-span-2 space-y-6">
+
+                        {/* ... Header e Dados cards mantidos ... */}
+                        {/* Estou omitindo linhas não alteradas para focar no fluxo, mas o replace precisa de contexto.
+                           Vou usar o StartLine adequadamente. */}
+
+                        {/* Como o replace deve ser preciso, vou focar apenas no componente Chat e handleFinish. 
+                           O handleFinish já está acima. Abaixo vou encontrar onde o Chat é renderizado para passar readOnly. */}
+
 
                         {/* Header Card */}
                         <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
@@ -297,6 +313,7 @@ export default function ManifestacaoDetailsPage() {
                                     onEnviar={handleEnviarMensagem}
                                     tipoUsuario="OUVIDOR"
                                     loading={loadingMensagens}
+                                    readOnly={isReadOnly}
                                 />
                             </div>
 

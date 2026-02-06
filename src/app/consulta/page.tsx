@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
-import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send } from "lucide-react";
+import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getManifestacaoByProtocol, saveSatisfacaoResposta } from "@/app/actions/consulta";
-import { getMensagens, enviarMensagemCidadao, TipoMensagem } from "@/app/actions/mensagens";
+import { getMensagens, enviarMensagemCidadao, finalizarManifestacaoCidadao, TipoMensagem } from "@/app/actions/mensagens";
 import { ChatMensagens } from "@/components/ChatMensagens";
 import { SentimentWidget, HumorType } from "@/components/SentimentWidget";
 
@@ -86,6 +86,25 @@ export default function ConsultaPage() {
         // Recarregar mensagens
         const msgs = await getMensagens(result.id, 'CIDADAO');
         setMensagens(msgs);
+    };
+
+    const handleFinalizar = async () => {
+        if (!result) return;
+        if (!confirm("Deseja encerrar esta manifestação? Isso confirmará que seu problema foi resolvido ou esclarecido.")) return;
+
+        try {
+            await finalizarManifestacaoCidadao(result.protocolo);
+
+            // Recarregar dados para atualizar status na tela
+            // Simula re-submit do form
+            const button = document.querySelector('form button[type="submit"]') as HTMLButtonElement;
+            if (button) button.click();
+
+            alert("Manifestação finalizada com sucesso. Obrigado!");
+        } catch (error) {
+            console.error(error);
+            alert("Não foi possível finalizar a manifestação.");
+        }
     };
 
     const getStatusColor = (status: string) => {
@@ -262,6 +281,19 @@ export default function ConsultaPage() {
                                             readOnly={result.status === 'ARQUIVADO' || result.status === 'CONCLUIDO'}
                                         />
                                     </div>
+
+                                    {/* Botão de Finalizar pelo Cidadão */}
+                                    {result.status !== 'CONCLUIDO' && result.status !== 'ARQUIVADO' && (
+                                        <div className="mt-6 flex justify-end">
+                                            <button
+                                                onClick={handleFinalizar}
+                                                className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-xl font-bold transition-all shadow-sm"
+                                            >
+                                                <CheckCircle className="w-5 h-5" />
+                                                Meu problema foi resolvido, encerrar manifestação
+                                            </button>
+                                        </div>
+                                    )}
 
                                     {/* Pesquisa de Satisfação - Apenas se concluído e tem resposta */}
                                     {result.status === 'CONCLUIDO' && result.resposta_oficial && (

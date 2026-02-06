@@ -28,7 +28,15 @@ export async function login(prevState: any, formData: FormData) {
         .eq("id", user?.id)
         .single();
 
-    if (profile?.user_type === "ADMIN") {
+    // Sincronizar metadata com profile para garantir que o middleware funcione corretamente
+    // O middleware lê do metadata para evitar queries no banco a cada request.
+    if (profile && user && user.user_metadata?.user_type !== profile.user_type) {
+        await supabase.auth.updateUser({
+            data: { user_type: profile.user_type }
+        });
+    }
+
+    if (profile?.user_type === "ADMIN" || profile?.user_type === "OUVIDOR") {
         redirect("/transparencia");
     } else {
         redirect("/"); // Redireciona para Home

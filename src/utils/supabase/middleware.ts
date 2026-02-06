@@ -51,9 +51,38 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // Rotas exclusivas para ADMIN (Transparência)
-    if (path.startsWith("/transparencia") && !user) {
-        return NextResponse.redirect(new URL("/login", request.url));
+    // Verificações de permissão baseadas no tipo de usuário
+    if (user) {
+        const userType = user.user_metadata?.user_type || 'COMUM';
+        const isOuvidor = userType === 'ADMIN' || userType === 'OUVIDOR';
+
+        // 1. Ouvidor NÃO acessa área de consulta pública nem abertura de manifestação
+        if (isOuvidor && (path.startsWith("/consulta") || path.startsWith("/registro") || path === "/")) {
+            // Se tentar acessar home ou consulta, vai para painel
+            return NextResponse.redirect(new URL("/transparencia", request.url));
+        }
+
+        // 2. Comum NÃO acessa área de transparência (gestão)
+        // Nota: A área 'transparencia' pública (dashboards) pode ser acessível, mas a gestão (/manifestacoes) não.
+        // Assumindo que /transparencia é o painel administrativo conforme contexto anterior.
+        // Se houver uma área pública de transparência, precisaria diferenciar rotas.
+        // Dado o contexto "Ações do servidor" em [protocolo], /transparencia parece ser a área restrita.
+        if (!isOuvidor && path.startsWith("/transparencia")) {
+            // Redireciona para consulta ou home
+            return NextResponse.redirect(new URL("/consulta", request.url));
+        }
+    } else {
+        // Usuário não logado
+        // Bloquear rotas protegidas
+        if (path.startsWith("/transparencia")) {
+            return NextResponse.redirect(new URL("/login", request.url));
+        }
+        // Consulta pública pode ser acessada sem login? Pelo contexto, sim (via protocolo), mas o middleware atual bloqueava.
+        // "Acesse a pagina de consultas isso é exclusivo do usuário comum."
+        // Se o usuário comum acessa sem logar (com protocolo), então não deve bloquear.
+        // Mas se requer login para ver histórico completo, deve bloquear.
+        // O código atual bloqueava `/consulta` sem user. Vou manter a proteção se for a regra atual.
+        // O usuário disse "usuário comum", não "anônimo".
     }
 
     return response

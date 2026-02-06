@@ -49,11 +49,21 @@ export async function getMensagens(manifestacaoId: string, tipoUsuario: 'OUVIDOR
 /**
  * Envia uma mensagem por parte do Ouvidor (Pode ser Resposta Oficial ou Nota Interna)
  */
+/**
+ * Helper para verificar se pode enviar mensagem
+ */
+function podeEnviarMensagem(status: string) {
+    return !['CONCLUIDO', 'ARQUIVADO'].includes(status);
+}
+
+/**
+ * Envia uma mensagem por parte do Ouvidor (Pode ser Resposta Oficial ou Nota Interna)
+ */
 export async function enviarMensagemOuvidor(
     manifestacaoId: string,
     conteudo: string,
     tipo: 'RESPOSTA_OFICIAL' | 'NOTA_INTERNA',
-    autorNome: string = "Ouvidoria"
+    autorNome: string = "Ouvidoria" // Fallback se não encontrar no profile
 ) {
     const supabase = await createClient();
 
@@ -63,17 +73,32 @@ export async function enviarMensagemOuvidor(
         throw new Error("Usuário não autenticado");
     }
 
-    // Usar adminClient para insert garantido (bypass RLS se necessário ou garantir permissão)
-    // Mas vamos usar o client normal se a policy estiver correta, ou admin se preferirmos robustez no server action
-    // Dado que configuramos RLS para Profile, vamos usar adminClient para evitar complexidade de pegar Profile ID agora
-    // e garantir consistência. Mas precisamos do ID do autor.
+    // Verificar status da manifestação
+    const { data: manifestacao, error: fetchError } = await adminClient
+        .from("manifestacoes")
+        .select("status")
+        .eq("id", manifestacaoId)
+        .single();
+
+    if (fetchError || !manifestacao) throw new Error("Manifestação não encontrada");
+
+    // Permite nota interna mesmo concluída? Geralmente sim, para registro. Mas Resposta Oficial não.
+    // O pedido foi "chat trancado". Vamos bloquear tudo para simplificar user rule.
+    if (!podeEnviarMensagem(manifestacao.status)) {
+        throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada.");
+    }
+
+    // Identificação do Ouvidor
+    const nomeReal = userData.user.user_metadata?.nome ||
+        userData.user.user_metadata?.full_name ||
+        autorNome;
 
     const { error } = await adminClient
         .from("mensagens_manifestacao")
         .insert({
             manifestacao_id: manifestacaoId,
             autor_id: userData.user.id,
-            autor_nome: autorNome,
+            autor_nome: nomeReal,
             tipo: tipo,
             conteudo: conteudo,
             lida: false
@@ -84,21 +109,18 @@ export async function enviarMensagemOuvidor(
         throw new Error("Falha ao enviar mensagem");
     }
 
-    // Se for resposta oficial, vamos também atualizar o status da manifestação para algo que indique movimento, se necessário
-    // E atualizar campos legados se ainda existirem para compatibilidade (opcional, mas recomendado na transição)
+    // Se for resposta oficial, vamos também atualizar o status da manifestação e data_resposta
     if (tipo === 'RESPOSTA_OFICIAL') {
         await adminClient.from("manifestacoes").update({
             respondida: true,
             data_resposta: new Date().toISOString(),
-            // atualiza campo legado por compatibilidade temporária
-            resposta_oficial: conteudo
+            resposta_oficial: conteudo // legado
         }).eq("id", manifestacaoId);
     }
 
     if (tipo === 'NOTA_INTERNA') {
         await adminClient.from("manifestacoes").update({
-            // atualiza campo legado por compatibilidade temporária
-            notas_internas: conteudo // isso sobrescreveria a nota anterior no campo legado, o que é aceitável na transição
+            notas_internas: conteudo // legado
         }).eq("id", manifestacaoId);
     }
 
@@ -119,7 +141,7 @@ export async function enviarMensagemCidadao(
     // Validar protocolo e pegar ID da manifestação
     const { data: manifestacao, error: fetchError } = await adminClient
         .from("manifestacoes")
-        .select("id, status")
+        .select("id, status, nome_cidadao")
         .eq("protocolo", protocolo)
         .single();
 
@@ -127,16 +149,19 @@ export async function enviarMensagemCidadao(
         throw new Error("Manifestação não encontrada");
     }
 
-    if (manifestacao.status === 'ARQUIVADO') {
-        throw new Error("Não é possível enviar mensagens para manifestação arquivada");
+    if (!podeEnviarMensagem(manifestacao.status)) {
+        throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
     }
+
+    // Usar nome cadastrado na manifestação se existir
+    const nomeReal = manifestacao.nome_cidadao || autorNome;
 
     const { error } = await adminClient
         .from("mensagens_manifestacao")
         .insert({
             manifestacao_id: manifestacao.id,
             autor_id: null, // Anônimo/Cidadão sem login
-            autor_nome: autorNome,
+            autor_nome: nomeReal,
             tipo: 'CIDADAO',
             conteudo: conteudo,
             lida: false
@@ -149,6 +174,113 @@ export async function enviarMensagemCidadao(
 
     // Invalidar caches
     await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
+
+    return { success: true };
+}
+
+/**
+ * Permite ao cidadão finalizar a manifestação se estiver satisfeito.
+ */
+export async function finalizarManifestacaoCidadao(protocolo: string) {
+    const { data: manifestacao, error: fetchError } = await adminClient
+        .from("manifestacoes")
+        .select("id, status, nome_cidadao")
+        .eq("protocolo", protocolo)
+        .single();
+
+    if (fetchError || !manifestacao) {
+        throw new Error("Manifestação não encontrada");
+    }
+
+    if (manifestacao.status === 'CONCLUIDO' || manifestacao.status === 'ARQUIVADO') {
+        throw new Error("Manifestação já está finalizada.");
+    }
+
+    const nomeReal = manifestacao.nome_cidadao || "Cidadão";
+
+    // 1. Inserir mensagem de sistema/aviso
+    await adminClient.from("mensagens_manifestacao").insert({
+        manifestacao_id: manifestacao.id,
+        tipo: 'RESPOSTA_OFICIAL', // Visível a todos
+        conteudo: `Atendimento finalizado pelo Cidadão ${nomeReal}.`,
+        autor_nome: "Sistema",
+        lida: true
+    });
+
+    // 2. Atualizar status
+    const { error } = await adminClient
+        .from("manifestacoes")
+        .update({
+            status: 'CONCLUIDO',
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", manifestacao.id);
+
+    if (error) throw new Error("Erro ao finalizar manifestação.");
+
+    // Invalidar caches
+    await invalidatePattern(`manifestacao:${protocolo}`); // Para consulta
+    await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
+
+    return { success: true };
+}
+
+/**
+ * Permite ao ouvidor finalizar a manifestação, inserindo mensagem de conclusão.
+ */
+export async function finalizarManifestacaoOuvidor(manifestacaoId: string) {
+    const supabase = await createClient();
+
+    // Verificar autenticação
+    const { data: userData, error: authError } = await supabase.auth.getUser();
+    if (authError || !userData.user) {
+        throw new Error("Usuário não autenticado");
+    }
+
+    const { data: manifestacao, error: fetchError } = await adminClient
+        .from("manifestacoes")
+        .select("id, status, protocolo")
+        .eq("id", manifestacaoId)
+        .single();
+
+    if (fetchError || !manifestacao) {
+        throw new Error("Manifestação não encontrada");
+    }
+
+    if (manifestacao.status === 'CONCLUIDO' || manifestacao.status === 'ARQUIVADO') {
+        throw new Error("Manifestação já está finalizada.");
+    }
+
+    // Nome do ouvidor
+    const nomeOuvidor = userData.user.user_metadata?.nome ||
+        userData.user.user_metadata?.full_name ||
+        "Ouvidor";
+
+    // 1. Inserir mensagem de finalização
+    await adminClient.from("mensagens_manifestacao").insert({
+        manifestacao_id: manifestacao.id,
+        autor_id: userData.user.id,
+        tipo: 'RESPOSTA_OFICIAL',
+        conteudo: `Este atendimento foi finalizado.`,
+        autor_nome: nomeOuvidor,
+        lida: true
+    });
+
+    // 2. Atualizar status
+    const { error } = await adminClient
+        .from("manifestacoes")
+        .update({
+            status: 'CONCLUIDO',
+            updated_at: new Date().toISOString()
+        })
+        .eq("id", manifestacao.id);
+
+    if (error) throw new Error("Erro ao finalizar manifestação.");
+
+    // Invalidar caches
+    await invalidatePattern(`manifestacao:${manifestacao.protocolo}`);
+    await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
+    await invalidatePattern(`dashboard:stats:*`);
 
     return { success: true };
 }
