@@ -4,13 +4,24 @@ import { createClient } from '@supabase/supabase-js'
 // It should ONLY be used in trusted server-side contexts (Server Actions/Components).
 // NEVER expose this client or the service role key to the client.
 
-export const adminClient = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    {
-        auth: {
-            autoRefreshToken: false,
-            persistSession: false,
-        },
-    }
-)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (!supabaseUrl) {
+    console.error("[adminClient] NEXT_PUBLIC_SUPABASE_URL não definida");
+    throw new Error("NEXT_PUBLIC_SUPABASE_URL is not defined");
+}
+
+if (!serviceRoleKey) {
+    console.error("[adminClient] SUPABASE_SERVICE_ROLE_KEY não definida");
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not defined. Please add it to your environment variables.");
+}
+
+console.log("[adminClient] Criando cliente admin com URL:", supabaseUrl.substring(0, 30) + "...");
+
+export const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+    auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+    },
+});

@@ -138,44 +138,55 @@ export async function enviarMensagemCidadao(
     conteudo: string,
     autorNome: string = "Cidadão"
 ) {
-    // Validar protocolo e pegar ID da manifestação
-    const { data: manifestacao, error: fetchError } = await adminClient
-        .from("manifestacoes")
-        .select("id, status, nome_cidadao")
-        .eq("protocolo", protocolo)
-        .single();
+    try {
+        // Validar protocolo e pegar ID da manifestação
+        const { data: manifestacao, error: fetchError } = await adminClient
+            .from("manifestacoes")
+            .select("id, status, identificacao_dados")
+            .eq("protocolo", protocolo)
+            .single();
 
-    if (fetchError || !manifestacao) {
-        throw new Error("Manifestação não encontrada");
+        if (fetchError) {
+            console.error("Erro ao buscar manifestação:", fetchError);
+            throw new Error("Manifestação não encontrada");
+        }
+
+        if (!manifestacao) {
+            throw new Error("Manifestação não encontrada");
+        }
+
+        if (!podeEnviarMensagem(manifestacao.status)) {
+            throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
+        }
+
+        // Extrair nome do cidadão do JSONB identificacao_dados ou usar fallback
+        const identificacao = manifestacao.identificacao_dados as { nome?: string } | null;
+        const nomeReal = identificacao?.nome || autorNome || "Cidadão";
+
+        const { error } = await adminClient
+            .from("mensagens_manifestacao")
+            .insert({
+                manifestacao_id: manifestacao.id,
+                autor_id: null,
+                autor_nome: nomeReal,
+                tipo: 'CIDADAO',
+                conteudo: conteudo,
+                lida: false
+            });
+
+        if (error) {
+            console.error("Erro ao inserir mensagem cidadão:", error);
+            throw new Error("Falha ao enviar mensagem: " + error.message);
+        }
+
+        // Invalidar caches
+        await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
+
+        return { success: true };
+    } catch (err: any) {
+        console.error("Erro em enviarMensagemCidadao:", err);
+        throw err;
     }
-
-    if (!podeEnviarMensagem(manifestacao.status)) {
-        throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
-    }
-
-    // Usar nome cadastrado na manifestação se existir
-    const nomeReal = manifestacao.nome_cidadao || autorNome;
-
-    const { error } = await adminClient
-        .from("mensagens_manifestacao")
-        .insert({
-            manifestacao_id: manifestacao.id,
-            autor_id: null, // Anônimo/Cidadão sem login
-            autor_nome: nomeReal,
-            tipo: 'CIDADAO',
-            conteudo: conteudo,
-            lida: false
-        });
-
-    if (error) {
-        console.error("Erro ao enviar mensagem cidadão:", error);
-        throw new Error("Falha ao enviar mensagem");
-    }
-
-    // Invalidar caches
-    await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
-
-    return { success: true };
 }
 
 /**
@@ -184,7 +195,7 @@ export async function enviarMensagemCidadao(
 export async function finalizarManifestacaoCidadao(protocolo: string) {
     const { data: manifestacao, error: fetchError } = await adminClient
         .from("manifestacoes")
-        .select("id, status, nome_cidadao")
+        .select("id, status, identificacao_dados")
         .eq("protocolo", protocolo)
         .single();
 
@@ -196,7 +207,9 @@ export async function finalizarManifestacaoCidadao(protocolo: string) {
         throw new Error("Manifestação já está finalizada.");
     }
 
-    const nomeReal = manifestacao.nome_cidadao || "Cidadão";
+    // Extrair nome do cidadão do JSONB identificacao_dados ou usar fallback
+    const identificacao = manifestacao.identificacao_dados as { nome?: string } | null;
+    const nomeReal = identificacao?.nome || "Cidadão";
 
     // 1. Inserir mensagem de sistema/aviso
     await adminClient.from("mensagens_manifestacao").insert({
