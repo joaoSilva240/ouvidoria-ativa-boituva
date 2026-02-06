@@ -142,7 +142,7 @@ export async function enviarMensagemCidadao(
         // Validar protocolo e pegar ID da manifestação
         const { data: manifestacao, error: fetchError } = await adminClient
             .from("manifestacoes")
-            .select("id, status, nome_cidadao")
+            .select("id, status, identificacao_dados")
             .eq("protocolo", protocolo)
             .single();
 
@@ -159,8 +159,9 @@ export async function enviarMensagemCidadao(
             throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
         }
 
-        // Usar nome cadastrado na manifestação se existir
-        const nomeReal = manifestacao.nome_cidadao || autorNome || "Cidadão";
+        // Extrair nome do cidadão do JSONB identificacao_dados ou usar fallback
+        const identificacao = manifestacao.identificacao_dados as { nome?: string } | null;
+        const nomeReal = identificacao?.nome || autorNome || "Cidadão";
 
         const { error } = await adminClient
             .from("mensagens_manifestacao")
@@ -194,7 +195,7 @@ export async function enviarMensagemCidadao(
 export async function finalizarManifestacaoCidadao(protocolo: string) {
     const { data: manifestacao, error: fetchError } = await adminClient
         .from("manifestacoes")
-        .select("id, status, nome_cidadao")
+        .select("id, status, identificacao_dados")
         .eq("protocolo", protocolo)
         .single();
 
@@ -206,7 +207,9 @@ export async function finalizarManifestacaoCidadao(protocolo: string) {
         throw new Error("Manifestação já está finalizada.");
     }
 
-    const nomeReal = manifestacao.nome_cidadao || "Cidadão";
+    // Extrair nome do cidadão do JSONB identificacao_dados ou usar fallback
+    const identificacao = manifestacao.identificacao_dados as { nome?: string } | null;
+    const nomeReal = identificacao?.nome || "Cidadão";
 
     // 1. Inserir mensagem de sistema/aviso
     await adminClient.from("mensagens_manifestacao").insert({
