@@ -138,44 +138,54 @@ export async function enviarMensagemCidadao(
     conteudo: string,
     autorNome: string = "Cidadão"
 ) {
-    // Validar protocolo e pegar ID da manifestação
-    const { data: manifestacao, error: fetchError } = await adminClient
-        .from("manifestacoes")
-        .select("id, status, nome_cidadao")
-        .eq("protocolo", protocolo)
-        .single();
+    try {
+        // Validar protocolo e pegar ID da manifestação
+        const { data: manifestacao, error: fetchError } = await adminClient
+            .from("manifestacoes")
+            .select("id, status, nome_cidadao")
+            .eq("protocolo", protocolo)
+            .single();
 
-    if (fetchError || !manifestacao) {
-        throw new Error("Manifestação não encontrada");
+        if (fetchError) {
+            console.error("Erro ao buscar manifestação:", fetchError);
+            throw new Error("Manifestação não encontrada");
+        }
+
+        if (!manifestacao) {
+            throw new Error("Manifestação não encontrada");
+        }
+
+        if (!podeEnviarMensagem(manifestacao.status)) {
+            throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
+        }
+
+        // Usar nome cadastrado na manifestação se existir
+        const nomeReal = manifestacao.nome_cidadao || autorNome || "Cidadão";
+
+        const { error } = await adminClient
+            .from("mensagens_manifestacao")
+            .insert({
+                manifestacao_id: manifestacao.id,
+                autor_id: null,
+                autor_nome: nomeReal,
+                tipo: 'CIDADAO',
+                conteudo: conteudo,
+                lida: false
+            });
+
+        if (error) {
+            console.error("Erro ao inserir mensagem cidadão:", error);
+            throw new Error("Falha ao enviar mensagem: " + error.message);
+        }
+
+        // Invalidar caches
+        await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
+
+        return { success: true };
+    } catch (err: any) {
+        console.error("Erro em enviarMensagemCidadao:", err);
+        throw err;
     }
-
-    if (!podeEnviarMensagem(manifestacao.status)) {
-        throw new Error("Não é possível enviar mensagens para manifestação concluída ou arquivada");
-    }
-
-    // Usar nome cadastrado na manifestação se existir
-    const nomeReal = manifestacao.nome_cidadao || autorNome;
-
-    const { error } = await adminClient
-        .from("mensagens_manifestacao")
-        .insert({
-            manifestacao_id: manifestacao.id,
-            autor_id: null, // Anônimo/Cidadão sem login
-            autor_nome: nomeReal,
-            tipo: 'CIDADAO',
-            conteudo: conteudo,
-            lida: false
-        });
-
-    if (error) {
-        console.error("Erro ao enviar mensagem cidadão:", error);
-        throw new Error("Falha ao enviar mensagem");
-    }
-
-    // Invalidar caches
-    await invalidatePattern(`manifestacoes:${manifestacao.id}:mensagens`);
-
-    return { success: true };
 }
 
 /**
