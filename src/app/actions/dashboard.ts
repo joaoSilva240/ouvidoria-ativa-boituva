@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { adminClient } from "@/utils/supabase/admin";
 import { getOrSet } from "@/utils/redis";
 
 export interface DashboardStats {
@@ -18,7 +18,8 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
 
     // Cache por 10 minutos (600 segundos) para não sobrecarregar o banco
     return await getOrSet(cacheKey, async () => {
-        const supabase = await createClient();
+        // Usar adminClient para garantir acesso total aos dados (dashboard é agregado, não sensível)
+        const supabase = adminClient;
 
         // Calcular data de início baseado no período
         const now = new Date();

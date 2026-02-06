@@ -8,6 +8,8 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 
 import { getManifestacaoByProtocolo, updateManifestacaoStatus, sendManifestacaoResponse } from "@/app/actions/manifestacoes";
+import { ChatMensagens } from "@/components/ChatMensagens";
+import { getMensagens, enviarMensagemOuvidor, finalizarManifestacaoOuvidor, TipoMensagem } from "@/app/actions/mensagens";
 
 /* --------------------------------------------------------------------------------
    Constants & Colors
@@ -23,7 +25,7 @@ const TIPO_COLORS: Record<string, string> = {
 
 const STATUS_OPTIONS = [
     { value: "PENDENTE", label: "Pendente" },
-    { value: "EM_ANALISE", label: "Em Análise" },
+    { value: "EM_ANALISE", label: "Análise" },
     { value: "CONCLUIDO", label: "Concluído" },
     { value: "ARQUIVADO", label: "Arquivado" },
 ];
@@ -68,8 +70,8 @@ export default function ManifestacaoDetailsPage() {
     const [manifestacao, setManifestacao] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState("");
-    const [resposta, setResposta] = useState("");
-    const [notas, setNotas] = useState("");
+    const [mensagens, setMensagens] = useState<any[]>([]);
+    const [loadingMensagens, setLoadingMensagens] = useState(false);
 
     // Loading states for actions
     const [isSaving, setIsSaving] = useState(false);
@@ -83,8 +85,13 @@ export default function ManifestacaoDetailsPage() {
             if (data) {
                 setManifestacao(data);
                 setStatus(data.status);
-                setResposta(data.resposta_oficial || "");
-                setNotas(data.notas_internas || "");
+
+                // Carregar mensagens
+                setLoadingMensagens(true);
+                getMensagens(data.id, 'OUVIDOR').then(msgs => {
+                    setMensagens(msgs);
+                    setLoadingMensagens(false);
+                });
             }
             setLoading(false);
         }
@@ -100,20 +107,17 @@ export default function ManifestacaoDetailsPage() {
         await updateManifestacaoStatus(manifestacao.id, newStatus);
     };
 
-    const handleSendResponse = async () => {
+    const handleEnviarMensagem = async (conteudo: string, tipo: TipoMensagem) => {
         if (!manifestacao) return;
-        setIsSaving(true);
-        try {
-            await sendManifestacaoResponse(manifestacao.id, resposta, notas, status);
-            // Reload data to confirm
-            const updated = await getManifestacaoByProtocolo(protocoloParam);
-            setManifestacao(updated);
-            alert("Resposta enviada com sucesso!");
-        } catch (error) {
-            alert("Erro ao enviar resposta.");
-        } finally {
-            setIsSaving(false);
-        }
+
+        // Garantir que Ouvidor não envie como Cidadão (embora a UI bloqueie)
+        if (tipo === 'CIDADAO') return;
+
+        await enviarMensagemOuvidor(manifestacao.id, conteudo, tipo);
+
+        // Recarregar mensagens
+        const msgs = await getMensagens(manifestacao.id, 'OUVIDOR');
+        setMensagens(msgs);
     };
 
     const handleFinish = async () => {
@@ -123,11 +127,18 @@ export default function ManifestacaoDetailsPage() {
 
         setIsFinishing(true);
         try {
-            await sendManifestacaoResponse(manifestacao.id, resposta, notas, "CONCLUIDO");
+            // Usa action atômica que insere mensagem E atualiza status
+            await finalizarManifestacaoOuvidor(manifestacao.id);
             setStatus("CONCLUIDO");
+
+            // Recarrega para refletir bloqueio e nova mensagem
+            const msgs = await getMensagens(manifestacao.id, 'OUVIDOR');
+            setMensagens(msgs);
+
             alert("Atendimento finalizado com sucesso!");
-        } catch (error) {
-            alert("Erro ao finalizar.");
+        } catch (error: any) {
+            console.error(error);
+            alert("Erro ao finalizar: " + (error.message || "Erro desconhecido"));
         } finally {
             setIsFinishing(false);
         }
@@ -153,6 +164,8 @@ export default function ManifestacaoDetailsPage() {
         );
     }
 
+    const isReadOnly = status === 'CONCLUIDO' || status === 'ARQUIVADO';
+
     return (
         <main className="min-h-screen bg-slate-50">
             <Navbar backHref="/transparencia" />
@@ -163,6 +176,14 @@ export default function ManifestacaoDetailsPage() {
 
                     {/* LEFT COLUMN (2/3) - Details */}
                     <div className="lg:col-span-2 space-y-6">
+
+                        {/* ... Header e Dados cards mantidos ... */}
+                        {/* Estou omitindo linhas não alteradas para focar no fluxo, mas o replace precisa de contexto.
+                           Vou usar o StartLine adequadamente. */}
+
+                        {/* Como o replace deve ser preciso, vou focar apenas no componente Chat e handleFinish. 
+                           O handleFinish já está acima. Abaixo vou encontrar onde o Chat é renderizado para passar readOnly. */}
+
 
                         {/* Header Card */}
                         <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
@@ -285,49 +306,25 @@ export default function ManifestacaoDetailsPage() {
                                 </div>
                             </div>
 
-                            {/* Response */}
+                            {/* Chat Integration */}
                             <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Resposta Oficial</label>
-                                    <span className="text-[10px] text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">(Visível ao cidadão)</span>
-                                </div>
-                                <textarea
-                                    value={resposta}
-                                    onChange={(e) => setResposta(e.target.value)}
-                                    placeholder="Escreva a resposta oficial aqui..."
-                                    className="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl p-4 text-grafite focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none transition-all"
+                                <ChatMensagens
+                                    mensagens={mensagens}
+                                    onEnviar={handleEnviarMensagem}
+                                    tipoUsuario="OUVIDOR"
+                                    loading={loadingMensagens}
+                                    readOnly={isReadOnly}
                                 />
                             </div>
 
-                            {/* Internal Notes */}
-                            <div className="mb-6">
-                                <div className="flex justify-between items-center mb-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Notas Internas</label>
-                                    <span className="text-[10px] text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        🔒 Privado
-                                    </span>
-                                </div>
-                                <textarea
-                                    value={notas}
-                                    onChange={(e) => setNotas(e.target.value)}
-                                    placeholder="Anotações para a equipe interna..."
-                                    className="w-full h-24 bg-amber-50/50 border border-amber-100 rounded-xl p-4 text-grafite focus:outline-none focus:ring-2 focus:ring-amber-200 focus:border-amber-300 resize-none transition-all"
-                                />
-                            </div>
+
 
                             <div className="space-y-3 pt-2">
-                                <button
-                                    onClick={handleSendResponse}
-                                    disabled={isSaving}
-                                    className="w-full bg-[#0EA5E9] hover:bg-[#0284C7] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-md shadow-blue-200"
-                                >
-                                    {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                                    Enviar Resposta
-                                </button>
+
 
                                 <button
                                     onClick={handleFinish}
-                                    disabled={isFinishing || !resposta.trim()}
+                                    disabled={isFinishing}
                                     className="w-full bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isFinishing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}

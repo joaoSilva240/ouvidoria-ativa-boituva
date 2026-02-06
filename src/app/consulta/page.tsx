@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
-import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send } from "lucide-react";
+import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getManifestacaoByProtocol, saveSatisfacaoResposta } from "@/app/actions/consulta";
+import { getMensagens, enviarMensagemCidadao, finalizarManifestacaoCidadao, TipoMensagem } from "@/app/actions/mensagens";
+import { ChatMensagens } from "@/components/ChatMensagens";
 import { SentimentWidget, HumorType } from "@/components/SentimentWidget";
 
 export default function ConsultaPage() {
@@ -16,6 +18,10 @@ export default function ConsultaPage() {
     const [satisfacao, setSatisfacao] = useState<HumorType>(null);
     const [satisfacaoSalva, setSatisfacaoSalva] = useState(false);
     const [salvandoSatisfacao, setSalvandoSatisfacao] = useState(false);
+
+    // Chat state
+    const [mensagens, setMensagens] = useState<any[]>([]);
+    const [loadingMensagens, setLoadingMensagens] = useState(false);
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -37,9 +43,19 @@ export default function ConsultaPage() {
             if (response.data.satisfacao_resposta) {
                 setSatisfacao(response.data.satisfacao_resposta as HumorType);
                 setSatisfacaoSalva(true);
-            } else {
                 setSatisfacao(null);
                 setSatisfacaoSalva(false);
+            }
+
+            // Carregar mensagens do chat (apenas públicas)
+            setLoadingMensagens(true);
+            try {
+                const msgs = await getMensagens(response.data.id, 'CIDADAO');
+                setMensagens(msgs);
+            } catch (err) {
+                console.error("Erro ao carregar mensagens", err);
+            } finally {
+                setLoadingMensagens(false);
             }
         } else {
             setError(response.error || "Manifestação não encontrada.");
@@ -58,6 +74,36 @@ export default function ConsultaPage() {
 
         if (response.success) {
             setSatisfacaoSalva(true);
+        }
+    };
+
+    const handleEnviarMensagem = async (conteudo: string, tipo: TipoMensagem) => {
+        if (!result) return;
+
+        // Cidadão só envia tipo CIDADAO
+        await enviarMensagemCidadao(result.protocolo, conteudo);
+
+        // Recarregar mensagens
+        const msgs = await getMensagens(result.id, 'CIDADAO');
+        setMensagens(msgs);
+    };
+
+    const handleFinalizar = async () => {
+        if (!result) return;
+        if (!confirm("Deseja encerrar esta manifestação? Isso confirmará que seu problema foi resolvido ou esclarecido.")) return;
+
+        try {
+            await finalizarManifestacaoCidadao(result.protocolo);
+
+            // Recarregar dados para atualizar status na tela
+            // Simula re-submit do form
+            const button = document.querySelector('form button[type="submit"]') as HTMLButtonElement;
+            if (button) button.click();
+
+            alert("Manifestação finalizada com sucesso. Obrigado!");
+        } catch (error) {
+            console.error(error);
+            alert("Não foi possível finalizar a manifestação.");
         }
     };
 
@@ -225,23 +271,28 @@ export default function ConsultaPage() {
                                         <p className="text-grafite/80 italic text-lg leading-relaxed whitespace-pre-wrap">"{result.relato}"</p>
                                     </div>
 
-                                    {result.resposta_oficial && (
-                                        <motion.div
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            className="bg-primary/5 p-8 rounded-3xl border-2 border-primary/10 relative overflow-hidden"
-                                        >
-                                            <div className="absolute top-0 right-0 p-4 opacity-10">
-                                                <Send className="w-16 h-16 text-primary" />
-                                            </div>
-                                            <div className="flex items-center gap-3 mb-4">
-                                                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
-                                                    <Send className="w-4 h-4" />
-                                                </div>
-                                                <span className="text-primary font-bold uppercase text-xs tracking-widest">Resposta da Ouvidoria</span>
-                                            </div>
-                                            <p className="text-grafite font-medium text-xl leading-relaxed whitespace-pre-wrap">{result.resposta_oficial}</p>
-                                        </motion.div>
+                                    {/* Chat Integration substituindo exibição estática antiga */}
+                                    <div className="mt-8">
+                                        <ChatMensagens
+                                            mensagens={mensagens}
+                                            onEnviar={handleEnviarMensagem}
+                                            tipoUsuario="CIDADAO"
+                                            loading={loadingMensagens}
+                                            readOnly={result.status === 'ARQUIVADO' || result.status === 'CONCLUIDO'}
+                                        />
+                                    </div>
+
+                                    {/* Botão de Finalizar pelo Cidadão */}
+                                    {result.status !== 'CONCLUIDO' && result.status !== 'ARQUIVADO' && (
+                                        <div className="mt-6 flex justify-end">
+                                            <button
+                                                onClick={handleFinalizar}
+                                                className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-xl font-bold transition-all shadow-sm"
+                                            >
+                                                <CheckCircle className="w-5 h-5" />
+                                                Meu problema foi resolvido, encerrar manifestação
+                                            </button>
+                                        </div>
                                     )}
 
                                     {/* Pesquisa de Satisfação - Apenas se concluído e tem resposta */}

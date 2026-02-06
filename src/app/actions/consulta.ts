@@ -62,6 +62,7 @@ export async function getManifestacaoByProtocol(protocolo: string) {
         return {
             success: true,
             data: {
+                id: cachedData.id,
                 protocolo: cachedData.protocolo,
                 status: cachedData.status,
                 data_criacao: cachedData.created_at,
