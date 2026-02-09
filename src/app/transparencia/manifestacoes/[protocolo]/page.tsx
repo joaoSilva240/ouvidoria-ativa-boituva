@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { User, MapPin, Loader2, Send, CheckCircle, AlertCircle } from "lucide-react";
@@ -65,59 +66,53 @@ function getInitials(name: string | null): string {
 export default function ManifestacaoDetailsPage() {
     const params = useParams();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const protocoloParam = params.protocolo as string;
 
-    const [manifestacao, setManifestacao] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [status, setStatus] = useState("");
-    const [mensagens, setMensagens] = useState<any[]>([]);
-    const [loadingMensagens, setLoadingMensagens] = useState(false);
 
     // Loading states for actions
     const [isSaving, setIsSaving] = useState(false);
     const [isFinishing, setIsFinishing] = useState(false);
 
-    useEffect(() => {
-        async function loadData() {
-            if (!protocoloParam) return;
-            setLoading(true);
-            const data = await getManifestacaoByProtocolo(protocoloParam);
-            if (data) {
-                setManifestacao(data);
-                setStatus(data.status);
+    // Query para manifestação
+    const { data: manifestacao, isLoading: loading } = useQuery({
+        queryKey: ['manifestacao', protocoloParam],
+        queryFn: () => getManifestacaoByProtocolo(protocoloParam),
+        enabled: !!protocoloParam,
+        staleTime: 2 * 60 * 1000,
+    });
 
-                // Carregar mensagens
-                setLoadingMensagens(true);
-                getMensagens(data.id, 'OUVIDOR').then(msgs => {
-                    setMensagens(msgs);
-                    setLoadingMensagens(false);
-                });
-            }
-            setLoading(false);
+    // Query para mensagens (depende do ID da manifestação)
+    const { data: mensagens = [], isLoading: loadingMensagens, refetch: refetchMensagens } = useQuery({
+        queryKey: ['mensagens', manifestacao?.id],
+        queryFn: () => getMensagens(manifestacao!.id, 'OUVIDOR'),
+        enabled: !!manifestacao?.id,
+        staleTime: 30 * 1000, // 30 segundos
+    });
+
+    // Sincronizar status quando manifestação carregar
+    useEffect(() => {
+        if (manifestacao?.status) {
+            setStatus(manifestacao.status);
         }
-        loadData();
-    }, [protocoloParam]);
+    }, [manifestacao?.status]);
 
     /* --------------------------------------------------------------------------------
        Handlers
     --------------------------------------------------------------------------------  */
     const handleStatusChange = async (newStatus: string) => {
+        if (!manifestacao) return;
         setStatus(newStatus);
-        // Optimistic update - actually save to DB
         await updateManifestacaoStatus(manifestacao.id, newStatus);
     };
 
     const handleEnviarMensagem = async (conteudo: string, tipo: TipoMensagem) => {
         if (!manifestacao) return;
-
-        // Garantir que Ouvidor não envie como Cidadão (embora a UI bloqueie)
         if (tipo === 'CIDADAO') return;
 
         await enviarMensagemOuvidor(manifestacao.id, conteudo, tipo);
-
-        // Recarregar mensagens
-        const msgs = await getMensagens(manifestacao.id, 'OUVIDOR');
-        setMensagens(msgs);
+        await refetchMensagens();
     };
 
     const handleFinish = async () => {
@@ -127,14 +122,9 @@ export default function ManifestacaoDetailsPage() {
 
         setIsFinishing(true);
         try {
-            // Usa action atômica que insere mensagem E atualiza status
             await finalizarManifestacaoOuvidor(manifestacao.id);
             setStatus("CONCLUIDO");
-
-            // Recarrega para refletir bloqueio e nova mensagem
-            const msgs = await getMensagens(manifestacao.id, 'OUVIDOR');
-            setMensagens(msgs);
-
+            await refetchMensagens();
             alert("Atendimento finalizado com sucesso!");
         } catch (error: any) {
             console.error(error);
