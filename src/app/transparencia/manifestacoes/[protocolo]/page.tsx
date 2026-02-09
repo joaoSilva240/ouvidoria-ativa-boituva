@@ -25,6 +25,15 @@ const TIPO_COLORS: Record<string, string> = {
     "OUTROS": "#64748b",
 };
 
+const TIPO_LABELS: Record<string, string> = {
+    "ELOGIO": "Elogio",
+    "SUGESTAO": "Sugestão",
+    "RECLAMACAO": "Reclamação",
+    "DENUNCIA": "Denúncia",
+    "INFORMACAO": "Informação",
+    "OUTROS": "Outros",
+};
+
 const STATUS_OPTIONS = [
     { value: "PENDENTE", label: "Pendente" },
     { value: "EM_ANALISE", label: "Análise" },
@@ -197,7 +206,7 @@ export default function ManifestacaoDetailsPage() {
                                         className="px-4 py-2 rounded-lg font-bold text-white shadow-sm flex items-center gap-2"
                                         style={{ backgroundColor: TIPO_COLORS[manifestacao.tipo] || "#64748b" }}
                                     >
-                                        {manifestacao.tipo}
+                                        {TIPO_LABELS[manifestacao.tipo] || manifestacao.tipo}
                                     </span>
                                     <span className="px-4 py-2 rounded-lg bg-bg-secondary text-text-primary font-medium border border-border-color">
                                         {manifestacao.secretaria}

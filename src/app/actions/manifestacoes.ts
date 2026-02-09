@@ -197,10 +197,41 @@ export async function getManifestacaoByProtocolo(protocolo: string) {
 }
 
 export async function updateManifestacaoStatus(id: string, status: string) {
-    // USING ADMIN CLIENT TO BYPASS RLS
-    const supabase = adminClient;
+    const supabase = await createClient(); // Para pegar o usuário logado
+    const admin = adminClient; // Para escritas privilegiadas
 
-    const { error } = await supabase
+    // 1. Verificar autenticação e pegar nome do usuário
+    const { data: { user } } = await supabase.auth.getUser();
+
+    let nomeAutor = "Sistema";
+    let autorId = null;
+
+    if (user) {
+        nomeAutor = user.user_metadata?.nome || user.user_metadata?.full_name || "Ouvidoria";
+        autorId = user.id;
+    }
+
+    // 2. Buscar protocolo para invalidar cache
+    const { data: currentManifestacao } = await admin
+        .from("manifestacoes")
+        .select("protocolo")
+        .eq("id", id)
+        .single();
+
+    const protocolo = currentManifestacao?.protocolo;
+
+    // 3. Mapeamento de Labels para o Chat
+    const STATUS_LABELS: Record<string, string> = {
+        "PENDENTE": "Pendente",
+        "EM_ANALISE": "Em Análise",
+        "CONCLUIDO": "Concluído",
+        "ARQUIVADO": "Arquivado"
+    };
+
+    const novoStatusLabel = STATUS_LABELS[status] || status;
+
+    // 4. Atualizar Status
+    const { error } = await admin
         .from("manifestacoes")
         .update({ status: status }) // DB uses uppercase ENUM
         .eq("id", id);
@@ -210,10 +241,25 @@ export async function updateManifestacaoStatus(id: string, status: string) {
         throw new Error("Failed to update status");
     }
 
-    // Invalidar cache do dashboard
+    // 5. Inserir Mensagem no Chat avisando da mudança
+    await admin.from("mensagens_manifestacao").insert({
+        manifestacao_id: id,
+        autor_id: autorId,
+        autor_nome: nomeAutor,
+        tipo: 'RESPOSTA_OFICIAL',
+        conteudo: `Status alterado para: ${novoStatusLabel}`,
+        lida: true
+    });
+
+    // 6. Invalidar caches
     await invalidatePattern("dashboard:stats:*");
-    // Invalidar listagem
     await invalidatePattern("manifestacoes:list:*");
+    await invalidatePattern(`manifestacoes:${id}:mensagens`);
+
+    if (protocolo) {
+        // Invalidar cache específico da manifestação
+        await invalidatePattern(`manifestacao:${protocolo}*`);
+    }
 
     return { success: true };
 }

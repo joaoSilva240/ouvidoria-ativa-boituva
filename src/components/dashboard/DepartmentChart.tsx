@@ -12,7 +12,7 @@ interface DepartmentChartProps {
     data: DepartmentData[];
 }
 
-const SECRETARIA_COLORS = ["#0EA5E9", "#10B981", "#A855F7"];
+const SECRETARIA_COLORS = ["#0EA5E9", "#10B981", "#F59E0B"];
 
 export function DepartmentChart({ data }: DepartmentChartProps) {
     return (

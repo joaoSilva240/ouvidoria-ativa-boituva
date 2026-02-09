@@ -11,6 +11,15 @@ import { getMensagens, enviarMensagemCidadao, finalizarManifestacaoCidadao, Tipo
 import { ChatMensagens } from "@/components/ChatMensagens";
 import { SentimentWidget, HumorType } from "@/components/SentimentWidget";
 
+const TIPO_LABELS: Record<string, string> = {
+    "ELOGIO": "Elogio",
+    "SUGESTAO": "Sugestão",
+    "RECLAMACAO": "Reclamação",
+    "DENUNCIA": "Denúncia",
+    "INFORMACAO": "Informação",
+    "OUTROS": "Outros",
+};
+
 export default function ConsultaPage() {
     const [protocolo, setProtocolo] = useState("");
     const [loading, setLoading] = useState(false);
@@ -271,7 +280,7 @@ export default function ConsultaPage() {
                                         </div>
                                         <div>
                                             <span className="text-text-secondary font-bold uppercase text-xs tracking-wider">Tipo</span>
-                                            <p className="text-lg font-bold text-text-primary capitalize">{result.tipo}</p>
+                                            <p className="text-lg font-bold text-text-primary">{TIPO_LABELS[result.tipo] || result.tipo}</p>
                                         </div>
                                     </div>
                                 </div>

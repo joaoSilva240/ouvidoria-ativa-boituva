@@ -37,6 +37,14 @@ const TIPO_COLORS: Record<string, string> = {
     "informacao": "#0EA5E9",
 };
 
+const TIPO_LABELS: Record<string, string> = {
+    "elogio": "Elogio",
+    "sugestao": "Sugestão",
+    "reclamacao": "Reclamação",
+    "denuncia": "Denúncia",
+    "informacao": "Informação",
+};
+
 const STATUS_COLORS: Record<string, string> = {
     "CONCLUIDO": "#10B981",
     "EM_ANALISE": "#0EA5E9",
@@ -241,9 +249,9 @@ export function ManifestacoesTab() {
                                         <td className="px-6 py-4">
                                             <span
                                                 className="px-3 py-1 rounded-full text-white text-sm font-semibold"
-                                                style={{ backgroundColor: TIPO_COLORS[item.tipo] || "#64748b" }}
+                                                style={{ backgroundColor: TIPO_COLORS[item.tipo.toLowerCase()] || "#64748b" }}
                                             >
-                                                {item.tipo.charAt(0) + item.tipo.slice(1).toLowerCase()}
+                                                {TIPO_LABELS[item.tipo.toLowerCase()] || item.tipo}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-text-primary/80">{item.secretaria}</td>
