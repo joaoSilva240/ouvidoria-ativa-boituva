@@ -24,7 +24,7 @@ export default function LandingPage() {
                 </header>
 
                 {/* Action Cards Section */}
-                <section className="flex flex-col gap-6 w-[80%] max-w-4xl">
+                <section className="flex flex-col gap-6 w-[80%]">
                     <Link href="/registro/identificacao" className="w-full">
                         <ActionCard
                             title="Registrar Nova Manifestação"
