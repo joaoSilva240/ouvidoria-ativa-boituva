@@ -101,7 +101,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/40 z-[100]"
+                        className="fixed inset-0 bg-black/40 z-[100] backdrop-blur-sm"
                     />
 
                     {/* Sidebar */}
@@ -110,25 +110,25 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         animate={{ x: 0 }}
                         exit={{ x: "100%" }}
                         transition={{ type: "spring", damping: 30, stiffness: 350 }}
-                        className="fixed right-0 top-0 h-full w-80 z-[101] flex flex-col shadow-2xl bg-white border-l border-slate-200"
+                        className="fixed right-0 top-0 h-full w-80 z-[101] flex flex-col shadow-2xl bg-bg-card border-l border-border-color text-text-primary"
                     >
                         {/* Header */}
-                        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
-                            <h2 className="text-lg font-bold text-grafite">Menu</h2>
+                        <div className="flex items-center justify-between p-5 border-b border-border-color bg-bg-secondary">
+                            <h2 className="text-lg font-bold text-text-primary">Menu</h2>
                             <button
                                 onClick={onClose}
-                                className="p-2 rounded-full hover:bg-slate-200 transition-colors"
+                                className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                             >
-                                <X className="w-5 h-5 text-grafite" />
+                                <X className="w-5 h-5 text-text-primary" />
                             </button>
                         </div>
 
                         {/* Profile Section */}
-                        <div className="p-5 border-b border-slate-100">
+                        <div className="p-5 border-b border-border-color">
                             {isLoading ? (
                                 <div className="animate-pulse space-y-3">
-                                    <div className="w-14 h-14 bg-slate-200 rounded-full" />
-                                    <div className="h-4 bg-slate-200 rounded w-3/4" />
+                                    <div className="w-14 h-14 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
                                 </div>
                             ) : profile ? (
                                 <div className="space-y-4">
@@ -137,7 +137,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                             {getInitials(profile.nome)}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-grafite text-sm">{profile.nome}</p>
+                                            <p className="font-semibold text-text-primary text-sm">{profile.nome}</p>
                                             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${profile.user_type === "ADMIN"
                                                     ? "bg-primary/10 text-primary"
                                                     : "bg-verde-natureza/10 text-verde-natureza"
@@ -148,54 +148,54 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-2 text-xs">
-                                        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                                            <p className="text-slate-400 uppercase font-medium tracking-wide mb-0.5">CPF</p>
-                                            <p className="text-grafite font-semibold">{maskCPF(profile.cpf)}</p>
+                                        <div className="p-2.5 bg-bg-secondary rounded-xl border border-border-color">
+                                            <p className="text-text-secondary uppercase font-medium tracking-wide mb-0.5">CPF</p>
+                                            <p className="text-text-primary font-semibold">{maskCPF(profile.cpf)}</p>
                                         </div>
-                                        <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                                            <p className="text-slate-400 uppercase font-medium tracking-wide mb-0.5">Telefone</p>
-                                            <p className="text-grafite font-semibold">{profile.telefone || "—"}</p>
+                                        <div className="p-2.5 bg-bg-secondary rounded-xl border border-border-color">
+                                            <p className="text-text-secondary uppercase font-medium tracking-wide mb-0.5">Telefone</p>
+                                            <p className="text-text-primary font-semibold">{profile.telefone || "—"}</p>
                                         </div>
-                                        <div className="col-span-2 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
-                                            <p className="text-slate-400 uppercase font-medium tracking-wide mb-0.5">Email</p>
-                                            <p className="text-grafite font-semibold truncate">{profile.email}</p>
+                                        <div className="col-span-2 p-2.5 bg-bg-secondary rounded-xl border border-border-color">
+                                            <p className="text-text-secondary uppercase font-medium tracking-wide mb-0.5">Email</p>
+                                            <p className="text-text-primary font-semibold truncate">{profile.email}</p>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="text-center py-4">
                                     <User className="w-10 h-10 text-slate-300 mx-auto mb-2" />
-                                    <p className="text-slate-400 text-sm">Não autenticado</p>
+                                    <p className="text-text-secondary text-sm">Não autenticado</p>
                                 </div>
                             )}
                         </div>
 
                         {/* Theme Toggle */}
-                        <div className="p-3 border-b border-slate-100">
+                        <div className="p-3 border-b border-border-color">
                             <button
                                 onClick={toggleTheme}
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-slate-50"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors hover:bg-bg-secondary"
                             >
                                 {theme === "light" ? (
-                                    <Moon className="w-5 h-5 text-slate-500" />
+                                    <Moon className="w-5 h-5 text-text-secondary" />
                                 ) : (
                                     <Sun className="w-5 h-5 text-amarelo-aventura" />
                                 )}
-                                <span className="text-grafite font-medium text-sm">
+                                <span className="text-text-primary font-medium text-sm">
                                     {theme === "light" ? "Modo Escuro" : "Modo Claro"}
                                 </span>
                             </button>
                         </div>
 
                         {/* History */}
-                        <div className="flex-1 overflow-y-auto p-4">
+                        <div className="flex-1 overflow-y-auto p-4 bg-bg-card">
                             <div className="flex items-center gap-2 mb-3">
-                                <Clock className="w-4 h-4 text-slate-400" />
-                                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide">Histórico Recente</h3>
+                                <Clock className="w-4 h-4 text-text-secondary" />
+                                <h3 className="text-xs font-bold text-text-secondary uppercase tracking-wide">Histórico Recente</h3>
                             </div>
 
                             {history.length === 0 ? (
-                                <p className="text-xs text-slate-400 text-center py-4">
+                                <p className="text-xs text-text-secondary text-center py-4">
                                     Nenhuma manifestação acessada
                                 </p>
                             ) : (
@@ -204,12 +204,12 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                                         <button
                                             key={item.protocolo}
                                             onClick={() => handleHistoryClick(item.protocolo)}
-                                            className="w-full text-left px-3 py-2.5 rounded-xl transition-colors hover:bg-slate-50 border border-slate-100"
+                                            className="w-full text-left px-3 py-2.5 rounded-xl transition-colors hover:bg-bg-secondary border border-border-color group"
                                         >
-                                            <p className="font-mono text-xs text-primary font-bold">
+                                            <p className="font-mono text-xs text-primary font-bold group-hover:text-primary/80 transition-colors">
                                                 {item.protocolo}
                                             </p>
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="text-[10px] text-text-secondary">
                                                 {item.tipo} • {new Date(item.timestamp).toLocaleDateString("pt-BR")}
                                             </p>
                                         </button>
@@ -219,10 +219,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                         </div>
 
                         {/* Logout */}
-                        <div className="p-4 border-t border-slate-100">
+                        <div className="p-4 border-t border-border-color bg-bg-card">
                             <button
                                 onClick={handleLogout}
-                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors font-semibold text-sm"
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors font-semibold text-sm"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Sair da conta

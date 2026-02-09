@@ -20,8 +20,8 @@ function TabButton({ active, onClick, icon, children }: TabButtonProps) {
         <button
             onClick={onClick}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${active
-                    ? "bg-primary text-white shadow-md"
-                    : "text-grafite hover:bg-slate-100"
+                ? "bg-primary text-white shadow-md shadow-primary/20"
+                : "text-text-secondary hover:bg-bg-secondary hover:text-text-primary"
                 }`}
         >
             {icon}
@@ -34,12 +34,12 @@ export default function TransparenciaPage() {
     const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
     return (
-        <main className="min-h-screen bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-100">
+        <main className="min-h-screen bg-bg-primary transition-colors duration-300">
             <Navbar />
 
             {/* Tab Navigation */}
             <div className="max-w-7xl mx-auto px-6 pt-6">
-                <div className="flex gap-2 bg-white rounded-2xl p-2 shadow-sm w-fit">
+                <div className="flex gap-2 bg-bg-card rounded-2xl p-2 shadow-sm border border-border-color w-fit">
                     <TabButton
                         active={activeTab === "dashboard"}
                         onClick={() => setActiveTab("dashboard")}

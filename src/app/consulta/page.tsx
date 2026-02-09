@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, MapPin, Send, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useHistory } from "@/contexts/HistoryContext";
 import { getManifestacaoByProtocol, saveSatisfacaoResposta } from "@/app/actions/consulta";
 import { getMensagens, enviarMensagemCidadao, finalizarManifestacaoCidadao, TipoMensagem } from "@/app/actions/mensagens";
 import { ChatMensagens } from "@/components/ChatMensagens";
@@ -23,6 +24,10 @@ export default function ConsultaPage() {
     const [mensagens, setMensagens] = useState<any[]>([]);
     const [loadingMensagens, setLoadingMensagens] = useState(false);
 
+    // Hooks
+    const router = useRouter();
+    const { addToHistory } = useHistory();
+
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         setError("");
@@ -39,6 +44,12 @@ export default function ConsultaPage() {
 
         if (response.success && response.data) {
             setResult(response.data);
+
+            // Adicionar ao histórico
+            if (response.data.protocolo && response.data.tipo) {
+                addToHistory(response.data.protocolo, response.data.tipo);
+            }
+
             // Se já tem satisfação salva, marcar como salva
             if (response.data.satisfacao_resposta) {
                 setSatisfacao(response.data.satisfacao_resposta as HumorType);
@@ -126,7 +137,7 @@ export default function ConsultaPage() {
     };
 
     return (
-        <div className="min-h-screen bg-offwhite font-sans text-grafite flex flex-col">
+        <div className="min-h-screen bg-bg-primary font-sans text-text-primary flex flex-col transition-colors duration-300">
             <Navbar />
 
             <main className="flex-1 flex flex-col items-center pt-20 px-8 pb-32 max-w-4xl mx-auto w-full">
@@ -144,7 +155,7 @@ export default function ConsultaPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl font-bold text-grafite mb-6 tracking-tight"
+                        className="text-5xl font-bold text-text-primary mb-6 tracking-tight"
                     >
                         Acompanhe sua Manifestação
                     </motion.h2>
@@ -152,7 +163,7 @@ export default function ConsultaPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl text-grafite/60 font-medium max-w-2xl mx-auto"
+                        className="text-xl text-text-secondary font-medium max-w-2xl mx-auto"
                     >
                         Digite o número do protocolo recibido para verificar o andamento da sua solicitação.
                     </motion.p>
@@ -170,7 +181,7 @@ export default function ConsultaPage() {
                         value={protocolo}
                         onChange={(e) => setProtocolo(e.target.value.toUpperCase())}
                         placeholder="Ex: OUV-2024-1234"
-                        className="w-full h-24 rounded-[32px] border-4 border-slate-100 bg-white px-10 text-3xl font-bold text-grafite placeholder:text-slate-300 outline-none focus:border-primary transition-all shadow-xl shadow-slate-100"
+                        className="w-full h-24 rounded-[32px] border-4 border-border-color bg-bg-card px-10 text-3xl font-bold text-text-primary placeholder:text-slate-300 dark:placeholder:text-slate-600 outline-none focus:border-primary transition-all shadow-xl shadow-slate-100 dark:shadow-none"
                     />
                     <button
                         type="submit"
@@ -198,13 +209,13 @@ export default function ConsultaPage() {
                             initial={{ opacity: 0, y: 40 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 20 }}
-                            className="w-full bg-white rounded-[40px] shadow-2xl border border-slate-100 overflow-hidden"
+                            className="w-full bg-bg-card rounded-[40px] shadow-2xl border border-border-color overflow-hidden"
                         >
                             {/* Header do Card */}
-                            <div className="bg-slate-50 p-10 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div className="bg-bg-secondary p-10 border-b border-border-color flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                                 <div>
-                                    <span className="text-slate-400 font-bold uppercase text-sm tracking-wider block mb-2">Protocolo</span>
-                                    <h3 className="text-4xl font-black text-grafite tracking-tight">{result.protocolo}</h3>
+                                    <span className="text-text-secondary font-bold uppercase text-sm tracking-wider block mb-2">Protocolo</span>
+                                    <h3 className="text-4xl font-black text-text-primary tracking-tight">{result.protocolo}</h3>
                                 </div>
                                 <div className={`px-6 py-3 rounded-2xl border ${getStatusColor(result.status)} flex items-center gap-3`}>
                                     <div className={`w-3 h-3 rounded-full ${result.status === 'CONCLUIDO' ? 'bg-green-500' : result.status === 'EM_ANALISE' ? 'bg-blue-500' : 'bg-yellow-500'}`} />
@@ -220,10 +231,10 @@ export default function ConsultaPage() {
                                             <Calendar className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <span className="text-slate-400 font-bold uppercase text-xs tracking-wider">Data de Abertura</span>
-                                            <p className="text-lg font-bold text-grafite">
+                                            <span className="text-text-secondary font-bold uppercase text-xs tracking-wider">Data de Abertura</span>
+                                            <p className="text-lg font-bold text-text-primary">
                                                 {new Date(result.data_criacao).toLocaleDateString('pt-BR')}
-                                                <span className="text-slate-400 font-normal ml-2">
+                                                <span className="text-text-secondary font-normal ml-2">
                                                     às {new Date(result.data_criacao).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                                 </span>
                                             </p>
@@ -235,8 +246,8 @@ export default function ConsultaPage() {
                                             <Clock className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <span className="text-slate-400 font-bold uppercase text-xs tracking-wider">Última Atualização</span>
-                                            <p className="text-lg font-bold text-grafite">
+                                            <span className="text-text-secondary font-bold uppercase text-xs tracking-wider">Última Atualização</span>
+                                            <p className="text-lg font-bold text-text-primary">
                                                 {new Date(result.ultima_atualizacao).toLocaleDateString('pt-BR')}
                                             </p>
                                         </div>
@@ -249,8 +260,8 @@ export default function ConsultaPage() {
                                             <Building2 className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <span className="text-slate-400 font-bold uppercase text-xs tracking-wider">Departamento</span>
-                                            <p className="text-lg font-bold text-grafite leading-tight">{result.secretaria}</p>
+                                            <span className="text-text-secondary font-bold uppercase text-xs tracking-wider">Departamento</span>
+                                            <p className="text-lg font-bold text-text-primary leading-tight">{result.secretaria}</p>
                                         </div>
                                     </div>
 
@@ -259,16 +270,16 @@ export default function ConsultaPage() {
                                             <Megaphone className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <span className="text-slate-400 font-bold uppercase text-xs tracking-wider">Tipo</span>
-                                            <p className="text-lg font-bold text-grafite capitalize">{result.tipo}</p>
+                                            <span className="text-text-secondary font-bold uppercase text-xs tracking-wider">Tipo</span>
+                                            <p className="text-lg font-bold text-text-primary capitalize">{result.tipo}</p>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="md:col-span-2 pt-8 border-t border-slate-100">
-                                    <span className="text-slate-400 font-bold uppercase text-xs tracking-wider block mb-4">Relato Registrado</span>
-                                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-8">
-                                        <p className="text-grafite/80 italic text-lg leading-relaxed whitespace-pre-wrap">"{result.relato}"</p>
+                                <div className="md:col-span-2 pt-8 border-t border-border-color">
+                                    <span className="text-text-secondary font-bold uppercase text-xs tracking-wider block mb-4">Relato Registrado</span>
+                                    <div className="bg-bg-secondary p-6 rounded-2xl border border-border-color mb-8">
+                                        <p className="text-text-secondary italic text-lg leading-relaxed whitespace-pre-wrap">"{result.relato}"</p>
                                     </div>
 
                                     {/* Chat Integration substituindo exibição estática antiga */}
@@ -287,7 +298,7 @@ export default function ConsultaPage() {
                                         <div className="mt-6 flex justify-end">
                                             <button
                                                 onClick={handleFinalizar}
-                                                className="flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-xl font-bold transition-all shadow-sm"
+                                                className="flex items-center gap-2 px-6 py-3 bg-green-50 dark:bg-green-900/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/30 hover:bg-green-100 dark:hover:bg-green-900/20 rounded-xl font-bold transition-all shadow-sm"
                                             >
                                                 <CheckCircle className="w-5 h-5" />
                                                 Meu problema foi resolvido, encerrar manifestação
@@ -303,14 +314,14 @@ export default function ConsultaPage() {
                                             className="md:col-span-2 mt-8"
                                         >
                                             {satisfacaoSalva ? (
-                                                <div className="bg-green-50 p-8 rounded-3xl border-2 border-green-100 text-center">
-                                                    <span className="text-green-600 font-bold text-lg">
+                                                <div className="bg-green-50 dark:bg-green-900/10 p-8 rounded-3xl border-2 border-green-100 dark:border-green-900/30 text-center">
+                                                    <span className="text-green-600 dark:text-green-400 font-bold text-lg">
                                                         ✓ Obrigado pela sua avaliação!
                                                     </span>
                                                 </div>
                                             ) : (
-                                                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
-                                                    <h4 className="text-xl font-bold text-grafite mb-6 text-center">
+                                                <div className="bg-bg-secondary p-8 rounded-3xl border border-border-color">
+                                                    <h4 className="text-xl font-bold text-text-primary mb-6 text-center">
                                                         Como você avalia a resposta recebida?
                                                     </h4>
                                                     <div className="flex justify-center">
@@ -320,7 +331,7 @@ export default function ConsultaPage() {
                                                         />
                                                     </div>
                                                     {salvandoSatisfacao && (
-                                                        <p className="text-center text-slate-400 mt-4">
+                                                        <p className="text-center text-text-secondary mt-4">
                                                             Salvando avaliação...
                                                         </p>
                                                     )}
@@ -340,5 +351,5 @@ export default function ConsultaPage() {
     );
 }
 
-// Icone Clock (Lucide pode não ter exportado no import grandão, adicionando aqui para garantir ou importar do lucide)
+// Icone Clock e outros components
 import { Clock } from "lucide-react";

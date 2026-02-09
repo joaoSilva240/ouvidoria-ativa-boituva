@@ -15,7 +15,7 @@ export function StatCard({ icon: Icon, label, value, color }: StatCardProps) {
         primary: "bg-primary",
         green: "bg-verde-natureza",
         yellow: "bg-amarelo-aventura",
-        grafite: "bg-grafite",
+        grafite: "bg-slate-700 dark:bg-slate-600",
     };
 
     return (
@@ -23,7 +23,7 @@ export function StatCard({ icon: Icon, label, value, color }: StatCardProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-[24px] shadow-lg p-6 flex items-center gap-6 min-h-[140px]"
+            className="bg-bg-card rounded-[24px] shadow-lg p-6 flex items-center gap-6 min-h-[140px] border border-border-color"
         >
             {/* Icon Container */}
             <div className={`${colorVariants[color]} rounded-full p-4 flex items-center justify-center min-w-[64px] h-16`}>
@@ -32,10 +32,10 @@ export function StatCard({ icon: Icon, label, value, color }: StatCardProps) {
 
             {/* Content */}
             <div className="flex flex-col">
-                <p className="text-grafite/60 text-sm font-medium uppercase tracking-wide mb-1">
+                <p className="text-text-secondary text-sm font-medium uppercase tracking-wide mb-1">
                     {label}
                 </p>
-                <p className="text-4xl font-bold text-grafite">
+                <p className="text-4xl font-bold text-text-primary">
                     {value}
                 </p>
             </div>

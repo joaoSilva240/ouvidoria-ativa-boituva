@@ -24,8 +24,8 @@ export function DashboardFilters({ filters, activeFilter, onFilterChange }: Dash
                     className={`
                         px-8 py-4 rounded-full font-semibold text-lg transition-all min-w-[180px]
                         ${activeFilter === filter.value
-                            ? "bg-grafite text-white shadow-lg"
-                            : "bg-white text-grafite border-2 border-grafite/20 hover:border-grafite/40"
+                            ? "bg-primary text-white shadow-lg"
+                            : "bg-bg-card text-text-primary border-2 border-border-color hover:border-primary/50 hover:bg-bg-secondary"
                         }
                     `}
                 >

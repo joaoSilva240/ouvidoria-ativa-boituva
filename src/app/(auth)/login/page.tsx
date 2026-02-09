@@ -12,8 +12,8 @@ export default function LoginPage() {
     return (
         <div className="w-full">
             <div className="mb-8">
-                <h2 className="text-3xl font-bold text-grafite mb-2">Bem-vindo de volta!</h2>
-                <p className="text-slate-500">
+                <h2 className="text-3xl font-bold text-text-primary mb-2">Bem-vindo de volta!</h2>
+                <p className="text-text-secondary">
                     Acesse sua conta para acompanhar suas manifestações ou registrar uma nova.
                 </p>
             </div>
@@ -21,11 +21,11 @@ export default function LoginPage() {
             <form action={formAction} className="space-y-6">
                 {/* Email Input */}
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-grafite" htmlFor="email">
+                    <label className="text-sm font-bold text-text-primary" htmlFor="email">
                         E-mail
                     </label>
                     <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">
                             <User className="w-5 h-5" />
                         </div>
                         <input
@@ -34,18 +34,18 @@ export default function LoginPage() {
                             type="email"
                             placeholder="seu@email.com"
                             required
-                            className="w-full h-12 pl-12 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-grafite focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-slate-400"
+                            className="w-full h-12 pl-12 pr-4 rounded-xl border border-border-color bg-bg-secondary text-text-primary focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-secondary/50"
                         />
                     </div>
                 </div>
 
                 {/* Password Input */}
                 <div className="space-y-2">
-                    <label className="text-sm font-bold text-grafite" htmlFor="password">
+                    <label className="text-sm font-bold text-text-primary" htmlFor="password">
                         Senha
                     </label>
                     <div className="relative">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary">
                             <Lock className="w-5 h-5" />
                         </div>
                         <input
@@ -54,12 +54,12 @@ export default function LoginPage() {
                             type={showPassword ? "text" : "password"}
                             placeholder="••••••••"
                             required
-                            className="w-full h-12 pl-12 pr-12 rounded-xl border border-slate-200 bg-slate-50 text-grafite focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-slate-400"
+                            className="w-full h-12 pl-12 pr-12 rounded-xl border border-border-color bg-bg-secondary text-text-primary focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all placeholder:text-text-secondary/50"
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors"
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-text-secondary hover:text-primary transition-colors"
                         >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -68,10 +68,10 @@ export default function LoginPage() {
 
                 {/* Options */}
                 <div className="flex items-center justify-between text-sm">
-                    <label className="flex items-center gap-2 cursor-pointer text-slate-600 select-none">
+                    <label className="flex items-center gap-2 cursor-pointer text-text-secondary select-none">
                         <input
                             type="checkbox"
-                            className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
+                            className="w-4 h-4 rounded border-border-color text-primary focus:ring-primary bg-bg-secondary"
                         />
                         <span>Lembrar de mim</span>
                     </label>
@@ -82,7 +82,7 @@ export default function LoginPage() {
 
                 {/* Error Message */}
                 {errorMessage?.error && (
-                    <div className="p-4 bg-red-50 text-red-600 text-sm rounded-xl border border-red-100 flex items-start gap-2">
+                    <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm rounded-xl border border-red-100 dark:border-red-900/30 flex items-start gap-2">
                         <span>⚠️</span>
                         <span>{errorMessage.error}</span>
                     </div>
@@ -106,7 +106,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-8 text-center">
-                <p className="text-slate-500 text-sm">
+                <p className="text-text-secondary text-sm">
                     Ainda não tem cadastro?{" "}
                     <Link href="/cadastro" className="text-primary font-bold hover:underline">
                         Crie sua conta
