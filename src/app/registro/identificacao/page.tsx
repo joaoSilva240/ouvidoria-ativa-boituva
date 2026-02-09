@@ -71,8 +71,8 @@ export default function IdentificacaoPage() {
             <Stepper currentStep={1} />
 
             <header className="text-center mb-12">
-                <h2 className="text-4xl font-bold text-grafite mb-2">Como deseja se identificar?</h2>
-                <p className="text-xl text-grafite/50">Selecione uma das opções abaixo para continuar</p>
+                <h2 className="text-4xl font-bold text-text-primary mb-2">Como deseja se identificar?</h2>
+                <p className="text-xl text-text-secondary">Selecione uma das opções abaixo para continuar</p>
             </header>
 
             {/* Seleção de Modo */}
@@ -80,19 +80,19 @@ export default function IdentificacaoPage() {
                 <button
                     onClick={() => setMode("identificado")}
                     className={cn(
-                        "relative bg-white p-8 h-48 rounded-[32px] flex flex-col items-center justify-center gap-4 transition-all shadow-md group border-4",
+                        "relative bg-bg-card p-8 h-48 rounded-[32px] flex flex-col items-center justify-center gap-4 transition-all shadow-md group border-4",
                         mode === "identificado" ? "border-primary" : "border-transparent"
                     )}
                 >
                     <div className={cn(
                         "w-16 h-16 rounded-full flex items-center justify-center transition-colors",
-                        mode === "identificado" ? "bg-primary/10 text-primary" : "bg-slate-50 text-slate-300"
+                        mode === "identificado" ? "bg-primary/10 text-primary" : "bg-bg-secondary text-text-secondary"
                     )}>
                         <User className="w-8 h-8" />
                     </div>
                     <span className={cn(
                         "text-2xl font-bold tracking-tight transition-colors",
-                        mode === "identificado" ? "text-grafite" : "text-slate-300"
+                        mode === "identificado" ? "text-text-primary" : "text-text-secondary"
                     )}>
                         Identificado
                     </span>
@@ -101,19 +101,19 @@ export default function IdentificacaoPage() {
                 <button
                     onClick={() => setMode("anonimo")}
                     className={cn(
-                        "relative bg-white p-8 h-48 rounded-[32px] flex flex-col items-center justify-center gap-4 transition-all shadow-md group border-4",
+                        "relative bg-bg-card p-8 h-48 rounded-[32px] flex flex-col items-center justify-center gap-4 transition-all shadow-md group border-4",
                         mode === "anonimo" ? "border-primary" : "border-transparent"
                     )}
                 >
                     <div className={cn(
                         "w-16 h-16 rounded-full flex items-center justify-center transition-colors",
-                        mode === "anonimo" ? "bg-primary/10 text-primary" : "bg-slate-100 text-slate-300"
+                        mode === "anonimo" ? "bg-primary/10 text-primary" : "bg-bg-secondary text-text-secondary"
                     )}>
                         <EyeOff className="w-8 h-8" />
                     </div>
                     <span className={cn(
                         "text-2xl font-bold tracking-tight transition-colors",
-                        mode === "anonimo" ? "text-grafite" : "text-slate-300"
+                        mode === "anonimo" ? "text-text-primary" : "text-text-secondary"
                     )}>
                         Anônimo
                     </span>
@@ -123,7 +123,7 @@ export default function IdentificacaoPage() {
             {/* Conteúdo baseado no modo */}
             <motion.div
                 layout
-                className="bg-white rounded-[40px] shadow-xl p-12 w-full flex flex-col gap-8 border border-slate-100"
+                className="bg-bg-card rounded-[40px] shadow-xl p-12 w-full flex flex-col gap-8 border border-border-color"
             >
                 <AnimatePresence mode="wait">
                     {mode === "identificado" ? (
@@ -135,16 +135,16 @@ export default function IdentificacaoPage() {
                             className="space-y-6"
                         >
                             <div className="text-center mb-6">
-                                <p className="text-lg text-grafite/60">
+                                <p className="text-lg text-text-secondary">
                                     Seus dados cadastrais serão vinculados a esta manifestação:
                                 </p>
                             </div>
 
                             {profile ? (
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Nome</p>
-                                        <p className="text-lg font-bold text-grafite">{profile.nome}</p>
+                                    <div className="p-5 bg-bg-secondary rounded-2xl border border-border-color">
+                                        <p className="text-xs text-text-secondary uppercase font-bold tracking-wider mb-1">Nome</p>
+                                        <p className="text-lg font-bold text-text-primary">{profile.nome}</p>
                                     </div>
                                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
                                         <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">CPF</p>

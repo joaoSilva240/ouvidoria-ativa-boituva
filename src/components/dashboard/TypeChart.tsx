@@ -19,9 +19,9 @@ export function TypeChart({ data }: TypeChartProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-white rounded-[24px] shadow-lg p-8"
+            className="bg-bg-card rounded-[24px] shadow-lg p-8 border border-border-color text-text-primary"
         >
-            <h3 className="text-2xl font-bold text-grafite mb-6">Distribuição por Tipo</h3>
+            <h3 className="text-2xl font-bold text-text-primary mb-6">Distribuição por Tipo</h3>
 
             <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
@@ -40,8 +40,9 @@ export function TypeChart({ data }: TypeChartProps) {
                     </Pie>
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "white",
-                            border: "none",
+                            backgroundColor: "var(--bg-card)",
+                            color: "var(--text-primary)",
+                            border: "1px solid var(--border-color)",
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                         }}

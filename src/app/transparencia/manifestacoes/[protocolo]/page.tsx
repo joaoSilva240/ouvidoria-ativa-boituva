@@ -20,9 +20,18 @@ const TIPO_COLORS: Record<string, string> = {
     "ELOGIO": "#10B981",    // Green
     "SUGESTAO": "#F59E0B",   // Amber
     "RECLAMACAO": "#F97316", // Orange
-    "DENUNCIA": "#334155",   // Slate
+    "DENUNCIA": "#EF4444",   // Red/Alert (Was Slate)
     "INFORMACAO": "#0EA5E9", // Blue
     "OUTROS": "#64748b",
+};
+
+const TIPO_LABELS: Record<string, string> = {
+    "ELOGIO": "Elogio",
+    "SUGESTAO": "Sugestão",
+    "RECLAMACAO": "Reclamação",
+    "DENUNCIA": "Denúncia",
+    "INFORMACAO": "Informação",
+    "OUTROS": "Outros",
 };
 
 const STATUS_OPTIONS = [
@@ -100,12 +109,12 @@ export default function ManifestacaoDetailsPage() {
         }
     }, [manifestacao?.status]);
 
-    // Adicionar ao histórico apenas uma vez por protocolo
+    // Adicionar ao histórico APENAS quando tiver protocolo E tipo
     useEffect(() => {
-        if (manifestacao?.tipo && protocoloParam) {
+        if (protocoloParam && manifestacao?.tipo) {
             addToHistory(protocoloParam, manifestacao.tipo);
         }
-    }, [protocoloParam]); // Apenas quando protocolo mudar
+    }, [protocoloParam, manifestacao?.tipo, addToHistory]);
 
     /* --------------------------------------------------------------------------------
        Handlers
@@ -145,7 +154,7 @@ export default function ManifestacaoDetailsPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50">
+            <div className="min-h-screen flex items-center justify-center bg-bg-primary">
                 <Loader2 className="w-10 h-10 animate-spin text-primary" />
             </div>
         );
@@ -153,9 +162,9 @@ export default function ManifestacaoDetailsPage() {
 
     if (!manifestacao) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 gap-4">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-bg-primary gap-4">
                 <AlertCircle className="w-16 h-16 text-red-500" />
-                <h1 className="text-2xl font-bold text-grafite">Manifestação não encontrada</h1>
+                <h1 className="text-2xl font-bold text-text-primary">Manifestação não encontrada</h1>
                 <Link href="/transparencia/manifestacoes" className="text-primary hover:underline">
                     Voltar para a lista
                 </Link>
@@ -166,7 +175,7 @@ export default function ManifestacaoDetailsPage() {
     const isReadOnly = status === 'CONCLUIDO' || status === 'ARQUIVADO';
 
     return (
-        <main className="min-h-screen bg-slate-50">
+        <main className="min-h-screen bg-bg-secondary">
             <Navbar />
 
             <div className="max-w-7xl mx-auto py-8 px-4 lg:px-8">
@@ -176,16 +185,8 @@ export default function ManifestacaoDetailsPage() {
                     {/* LEFT COLUMN (2/3) - Details */}
                     <div className="lg:col-span-2 space-y-6">
 
-                        {/* ... Header e Dados cards mantidos ... */}
-                        {/* Estou omitindo linhas não alteradas para focar no fluxo, mas o replace precisa de contexto.
-                           Vou usar o StartLine adequadamente. */}
-
-                        {/* Como o replace deve ser preciso, vou focar apenas no componente Chat e handleFinish. 
-                           O handleFinish já está acima. Abaixo vou encontrar onde o Chat é renderizado para passar readOnly. */}
-
-
                         {/* Header Card */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                        <div className="bg-bg-card rounded-2xl shadow-sm p-6 border border-border-color">
                             <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                                 <div>
                                     <h1 className="text-3xl font-bold text-primary flex items-center gap-2">
@@ -196,7 +197,7 @@ export default function ManifestacaoDetailsPage() {
                                             {status.replace("_", " ")}
                                         </span>
                                     </h1>
-                                    <p className="text-slate-500 text-sm mt-1">
+                                    <p className="text-text-secondary text-sm mt-1">
                                         Protocolado em {formatDate(manifestacao.created_at)}
                                     </p>
                                 </div>
@@ -205,9 +206,9 @@ export default function ManifestacaoDetailsPage() {
                                         className="px-4 py-2 rounded-lg font-bold text-white shadow-sm flex items-center gap-2"
                                         style={{ backgroundColor: TIPO_COLORS[manifestacao.tipo] || "#64748b" }}
                                     >
-                                        {manifestacao.tipo}
+                                        {TIPO_LABELS[manifestacao.tipo] || manifestacao.tipo}
                                     </span>
-                                    <span className="px-4 py-2 rounded-lg bg-slate-100 text-grafite font-medium border border-slate-200">
+                                    <span className="px-4 py-2 rounded-lg bg-bg-secondary text-text-primary font-medium border border-border-color">
                                         {manifestacao.secretaria}
                                     </span>
                                 </div>
@@ -215,13 +216,13 @@ export default function ManifestacaoDetailsPage() {
                         </div>
 
                         {/* Citizen Data Card */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
+                        <div className="bg-bg-card rounded-2xl shadow-sm p-6 border border-border-color">
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-xl font-bold text-grafite flex items-center gap-2">
+                                <h2 className="text-xl font-bold text-text-primary flex items-center gap-2">
                                     <User className="w-5 h-5 text-primary" />
                                     Dados do Cidadão
                                 </h2>
-                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${manifestacao.nome_cidadao ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
+                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${manifestacao.nome_cidadao ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" : "bg-bg-secondary text-text-secondary"
                                     }`}>
                                     {manifestacao.nome_cidadao ? "Identificado" : "Anônimo"}
                                 </span>
@@ -229,16 +230,16 @@ export default function ManifestacaoDetailsPage() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Nome Completo</label>
-                                    <p className="text-grafite font-medium text-lg">{manifestacao.nome_cidadao || "Anônimo"}</p>
+                                    <label className="text-xs font-bold text-text-secondary uppercase block mb-1">Nome Completo</label>
+                                    <p className="text-text-primary font-medium text-lg">{manifestacao.nome_cidadao || "Anônimo"}</p>
                                 </div>
                                 <div>
-                                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">CPF / Contato</label>
-                                    <p className="text-grafite font-medium text-lg">{manifestacao.cpf ? maskCPF(manifestacao.cpf) : "-"}</p>
+                                    <label className="text-xs font-bold text-text-secondary uppercase block mb-1">CPF / Contato</label>
+                                    <p className="text-text-primary font-medium text-lg">{manifestacao.cpf ? maskCPF(manifestacao.cpf) : "-"}</p>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase block mb-1">Local da Ocorrência</label>
-                                    <div className="flex items-center gap-2 text-grafite bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <label className="text-xs font-bold text-text-secondary uppercase block mb-1">Local da Ocorrência</label>
+                                    <div className="flex items-center gap-2 text-text-primary bg-bg-secondary p-3 rounded-lg border border-border-color">
                                         <MapPin className="w-5 h-5 text-primary" />
                                         {manifestacao.bairro || "Endereço não informado"}
                                     </div>
@@ -247,28 +248,28 @@ export default function ManifestacaoDetailsPage() {
                         </div>
 
                         {/* Report Card */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
-                            <h2 className="text-xl font-bold text-grafite mb-4 flex items-center gap-2">
+                        <div className="bg-bg-card rounded-2xl shadow-sm p-6 border border-border-color">
+                            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
                                 <span className="text-2xl">📝</span> Relato do Cidadão
                             </h2>
-                            <div className="prose prose-slate max-w-none text-grafite/80 leading-relaxed bg-slate-50 p-6 rounded-xl border border-slate-100">
+                            <div className="prose prose-slate dark:prose-invert max-w-none text-text-primary/80 leading-relaxed bg-bg-secondary p-6 rounded-xl border border-border-color">
                                 {manifestacao.relato}
                             </div>
                         </div>
 
                         {/* History Card (Visual only for now) */}
-                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
-                            <h2 className="text-xs font-bold text-slate-400 uppercase mb-4">Histórico Recente</h2>
-                            <div className="relative border-l-2 border-slate-100 ml-3 space-y-8 pl-6 py-2">
+                        <div className="bg-bg-card rounded-2xl shadow-sm p-6 border border-border-color">
+                            <h2 className="text-xs font-bold text-text-secondary uppercase mb-4">Histórico Recente</h2>
+                            <div className="relative border-l-2 border-border-color ml-3 space-y-8 pl-6 py-2">
                                 <div className="relative">
-                                    <div className="absolute -left-[31px] w-4 h-4 rounded-full bg-primary border-4 border-white shadow-sm"></div>
-                                    <p className="text-xs text-slate-400 mb-1">Hoje, 10:00</p>
-                                    <p className="text-grafite font-medium">Situação atual: {status.replace("_", " ")}</p>
+                                    <div className="absolute -left-[31px] w-4 h-4 rounded-full bg-primary border-4 border-bg-card shadow-sm"></div>
+                                    <p className="text-xs text-text-secondary mb-1">Hoje, 10:00</p>
+                                    <p className="text-text-primary font-medium">Situação atual: {status.replace("_", " ")}</p>
                                 </div>
                                 <div className="relative">
-                                    <div className="absolute -left-[31px] w-4 h-4 rounded-full bg-slate-300 border-4 border-white shadow-sm"></div>
-                                    <p className="text-xs text-slate-400 mb-1">{formatDate(manifestacao.created_at)}</p>
-                                    <p className="text-grafite font-medium">Manifestação recebida</p>
+                                    <div className="absolute -left-[31px] w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 border-4 border-bg-card shadow-sm"></div>
+                                    <p className="text-xs text-text-secondary mb-1">{formatDate(manifestacao.created_at)}</p>
+                                    <p className="text-text-primary font-medium">Manifestação recebida</p>
                                 </div>
                             </div>
                         </div>
@@ -278,28 +279,28 @@ export default function ManifestacaoDetailsPage() {
                     {/* RIGHT COLUMN (1/3) - Actions */}
                     <div className="space-y-6">
 
-                        <div className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100 sticky top-6">
-                            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-100">
-                                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <div className="bg-bg-card rounded-2xl shadow-sm p-6 border border-border-color sticky top-6">
+                            <div className="flex items-center gap-2 mb-6 pb-4 border-b border-border-color">
+                                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                                     <span className="text-blue-500 font-bold">💎</span>
                                 </div>
-                                <h2 className="font-bold text-grafite">Ações do Ouvidor</h2>
+                                <h2 className="font-bold text-text-primary">Ações do Ouvidor</h2>
                             </div>
 
                             {/* Change Status */}
                             <div className="mb-6">
-                                <label className="text-xs font-bold text-slate-400 uppercase block mb-2">Alterar Status</label>
+                                <label className="text-xs font-bold text-text-secondary uppercase block mb-2">Alterar Status</label>
                                 <div className="relative">
                                     <select
                                         value={status}
                                         onChange={(e) => handleStatusChange(e.target.value)}
-                                        className="w-full appearance-none bg-slate-50 border border-slate-200 text-grafite py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium transition-all cursor-pointer"
+                                        className="w-full appearance-none bg-bg-secondary border border-border-color text-text-primary py-3 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium transition-all cursor-pointer"
                                     >
                                         {STATUS_OPTIONS.map(opt => (
                                             <option key={opt.value} value={opt.value}>{opt.label}</option>
                                         ))}
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary">
                                         ▼
                                     </div>
                                 </div>
@@ -324,7 +325,7 @@ export default function ManifestacaoDetailsPage() {
                                 <button
                                     onClick={handleFinish}
                                     disabled={isFinishing}
-                                    className="w-full bg-green-50 hover:bg-green-100 text-green-700 border border-green-200 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                                    className="w-full bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/30 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                                 >
                                     {isFinishing ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle className="w-5 h-5" />}
                                     Finalizar Atendimento

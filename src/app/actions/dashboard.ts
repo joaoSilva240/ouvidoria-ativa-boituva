@@ -60,7 +60,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             "elogio": "#10B981",      // Verde Natureza
             "sugestao": "#F59E0B",    // Amarelo Aventura
             "reclamacao": "#F97316",  // Laranja
-            "denuncia": "#334155",    // Grafite
+            "denuncia": "#EF4444",    // Vermelho (Alerta)
             "informacao": "#0EA5E9",  // Azul Céu
         };
 

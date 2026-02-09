@@ -9,9 +9,17 @@
   --color-grafite: #334155;
 
   --font-sans: "Poppins", ui-sans-serif, system-ui;
+
+  /* Mapeamento de Cores Semânticas para Variáveis CSS */
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-card: var(--bg-card);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border-color: var(--border-color);
 }
 
-/* Dark Mode Variables */
+/* Modo Padrão (Light) */
 :root {
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
@@ -21,19 +29,37 @@
   --border-color: #e2e8f0;
 }
 
+/* Modo Escuro (Dark) */
 .dark {
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-card: #1e293b;
-  --text-primary: #e2e8f0;
+  --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
   --border-color: #334155;
 }
 
-/* Utility classes for theme */
-.bg-theme-primary { background-color: var(--bg-primary); }
-.bg-theme-secondary { background-color: var(--bg-secondary); }
-.bg-theme-card { background-color: var(--bg-card); }
-.text-theme-primary { color: var(--text-primary); }
-.text-theme-secondary { color: var(--text-secondary); }
-.border-theme { border-color: var(--border-color); }
+/* Classes utilitárias opcionais - Recomendado usar as variantes do Tailwind (ex: bg-bg-primary) */
+.bg-theme-primary {
+  background-color: var(--bg-primary);
+}
+
+.bg-theme-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.bg-theme-card {
+  background-color: var(--bg-card);
+}
+
+.text-theme-primary {
+  color: var(--text-primary);
+}
+
+.text-theme-secondary {
+  color: var(--text-secondary);
+}
+
+.border-theme {
+  border-color: var(--border-color);
+}

@@ -33,9 +33,9 @@ export function TimelineChart({ data, periodo }: TimelineChartProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="bg-white rounded-[24px] shadow-lg p-8"
+            className="bg-bg-card rounded-[24px] shadow-lg p-8 border border-border-color"
         >
-            <h3 className="text-2xl font-bold text-grafite mb-6">Evolução Temporal</h3>
+            <h3 className="text-2xl font-bold text-text-primary mb-6">Evolução Temporal</h3>
 
             <ResponsiveContainer width="100%" height={350}>
                 <AreaChart data={data}>
@@ -45,22 +45,23 @@ export function TimelineChart({ data, periodo }: TimelineChartProps) {
                             <stop offset="95%" stopColor="#0EA5E9" stopOpacity={0} />
                         </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" />
                     <XAxis
                         dataKey="data"
                         tickFormatter={formatXAxis}
-                        tick={{ fill: "#334155", fontSize: 12, fontWeight: 600 }}
-                        axisLine={{ stroke: "#e5e7eb" }}
+                        tick={{ fill: "var(--text-secondary)", fontSize: 12, fontWeight: 600 }}
+                        axisLine={{ stroke: "var(--border-color)" }}
                     />
                     <YAxis
-                        tick={{ fill: "#334155", fontSize: 12, fontWeight: 600 }}
-                        axisLine={{ stroke: "#e5e7eb" }}
+                        tick={{ fill: "var(--text-secondary)", fontSize: 12, fontWeight: 600 }}
+                        axisLine={{ stroke: "var(--border-color)" }}
                         allowDecimals={false}
                     />
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "white",
-                            border: "none",
+                            backgroundColor: "var(--bg-card)",
+                            color: "var(--text-primary)",
+                            border: "1px solid var(--border-color)",
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
                         }}

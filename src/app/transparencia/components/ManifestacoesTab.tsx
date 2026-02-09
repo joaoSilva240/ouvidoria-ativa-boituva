@@ -33,8 +33,16 @@ const TIPO_COLORS: Record<string, string> = {
     "elogio": "#10B981",
     "sugestao": "#F59E0B",
     "reclamacao": "#F97316",
-    "denuncia": "#334155",
+    "denuncia": "#EF4444",
     "informacao": "#0EA5E9",
+};
+
+const TIPO_LABELS: Record<string, string> = {
+    "elogio": "Elogio",
+    "sugestao": "Sugestão",
+    "reclamacao": "Reclamação",
+    "denuncia": "Denúncia",
+    "informacao": "Informação",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -101,11 +109,11 @@ export function ManifestacoesTab() {
         <div className="max-w-7xl mx-auto pt-6 px-6">
             {/* Title and Actions */}
             <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-grafite flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-text-primary flex items-center gap-2">
                     📋 Manifestações Recentes
                 </h2>
                 <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-4 py-2 border-2 border-grafite text-grafite rounded-lg font-semibold hover:bg-grafite hover:text-white transition-colors">
+                    <button className="flex items-center gap-2 px-4 py-2 border-2 border-text-primary text-text-primary rounded-lg font-semibold hover:bg-text-primary hover:text-bg-card transition-colors">
                         <Download className="w-5 h-5" />
                         Exportar
                     </button>
@@ -113,30 +121,30 @@ export function ManifestacoesTab() {
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-[24px] shadow-lg p-6 mb-6">
+            <div className="bg-bg-card rounded-[24px] shadow-lg p-6 mb-6 border border-border-color">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                     {/* Search */}
                     <div className="md:col-span-1">
-                        <label className="block text-sm font-semibold text-grafite mb-2">Buscar</label>
+                        <label className="block text-sm font-semibold text-text-primary mb-2">Buscar</label>
                         <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
                             <input
                                 type="text"
                                 placeholder="Buscar por CPF, Nome ou ID..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border-2 border-slate-200 rounded-lg focus:border-primary outline-none transition-colors"
+                                className="w-full pl-10 pr-4 py-2 bg-bg-secondary border-2 border-border-color text-text-primary rounded-lg focus:border-primary outline-none transition-colors placeholder:text-text-secondary/50"
                             />
                         </div>
                     </div>
 
                     {/* Tipo */}
                     <div>
-                        <label className="block text-sm font-semibold text-grafite mb-2">Tipo</label>
+                        <label className="block text-sm font-semibold text-text-primary mb-2">Tipo</label>
                         <select
                             value={tipo}
                             onChange={(e) => setTipo(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:border-primary outline-none transition-colors"
+                            className="w-full px-4 py-2 bg-bg-secondary border-2 border-border-color text-text-primary rounded-lg focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
                         >
                             {TIPO_OPTIONS.map(opt => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -146,11 +154,11 @@ export function ManifestacoesTab() {
 
                     {/* Secretaria */}
                     <div>
-                        <label className="block text-sm font-semibold text-grafite mb-2">Secretaria</label>
+                        <label className="block text-sm font-semibold text-text-primary mb-2">Secretaria</label>
                         <select
                             value={secretaria}
                             onChange={(e) => setSecretaria(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:border-primary outline-none transition-colors"
+                            className="w-full px-4 py-2 bg-bg-secondary border-2 border-border-color text-text-primary rounded-lg focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
                         >
                             <option value="TODAS">Todas</option>
                             {secretarias.map(sec => (
@@ -161,11 +169,11 @@ export function ManifestacoesTab() {
 
                     {/* Identidade */}
                     <div>
-                        <label className="block text-sm font-semibold text-grafite mb-2">Identidade</label>
+                        <label className="block text-sm font-semibold text-text-primary mb-2">Identidade</label>
                         <select
                             value={identidade}
                             onChange={(e) => setIdentidade(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:border-primary outline-none transition-colors"
+                            className="w-full px-4 py-2 bg-bg-secondary border-2 border-border-color text-text-primary rounded-lg focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
                         >
                             {IDENTIDADE_OPTIONS.map(opt => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -175,11 +183,11 @@ export function ManifestacoesTab() {
 
                     {/* Período */}
                     <div>
-                        <label className="block text-sm font-semibold text-grafite mb-2">Período</label>
+                        <label className="block text-sm font-semibold text-text-primary mb-2">Período</label>
                         <select
                             value={periodo}
                             onChange={(e) => setPeriodo(e.target.value)}
-                            className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:border-primary outline-none transition-colors"
+                            className="w-full px-4 py-2 bg-bg-secondary border-2 border-border-color text-text-primary rounded-lg focus:border-primary outline-none transition-colors appearance-none cursor-pointer"
                         >
                             {PERIODO_OPTIONS.map(opt => (
                                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -190,7 +198,7 @@ export function ManifestacoesTab() {
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-[24px] shadow-lg overflow-hidden mb-6">
+            <div className="bg-bg-card rounded-[24px] shadow-lg overflow-hidden mb-6 border border-border-color">
                 {loading ? (
                     <div className="flex items-center justify-center py-20">
                         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-primary"></div>
@@ -198,32 +206,32 @@ export function ManifestacoesTab() {
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-slate-50 border-b-2 border-slate-100">
+                            <thead className="bg-bg-secondary border-b-2 border-border-color">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">ID</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">Data</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">Cidadão</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">Tipo</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">Secretaria</th>
-                                    <th className="px-6 py-4 text-left text-xs font-bold text-grafite/60 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-4 text-center text-xs font-bold text-grafite/60 uppercase tracking-wider">Ações</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">ID</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Data</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Cidadão</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Tipo</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Secretaria</th>
+                                    <th className="px-6 py-4 text-left text-xs font-bold text-text-secondary uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-4 text-center text-xs font-bold text-text-secondary uppercase tracking-wider">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-border-color">
                                 {manifestacoes.map((item, index) => (
                                     <motion.tr
                                         key={item.id}
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.05 }}
-                                        className="hover:bg-slate-50 transition-colors"
+                                        className="hover:bg-bg-secondary transition-colors"
                                     >
                                         <td className="px-6 py-4">
                                             <Link href={`/consulta?protocolo=${item.protocolo}`} className="text-primary font-semibold hover:underline">
                                                 #{item.protocolo}
                                             </Link>
                                         </td>
-                                        <td className="px-6 py-4 text-grafite/80">{formatDate(item.created_at)}</td>
+                                        <td className="px-6 py-4 text-text-primary/80">{formatDate(item.created_at)}</td>
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
                                                 <div
@@ -233,20 +241,20 @@ export function ManifestacoesTab() {
                                                     {getInitials(item.nome_cidadao)}
                                                 </div>
                                                 <div>
-                                                    <div className="font-semibold text-grafite">{item.nome_cidadao || "Anônimo"}</div>
-                                                    <div className="text-xs text-grafite/50">{maskCPF(item.cpf)}</div>
+                                                    <div className="font-semibold text-text-primary">{item.nome_cidadao || "Anônimo"}</div>
+                                                    <div className="text-xs text-text-secondary">{maskCPF(item.cpf)}</div>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span
                                                 className="px-3 py-1 rounded-full text-white text-sm font-semibold"
-                                                style={{ backgroundColor: TIPO_COLORS[item.tipo] || "#64748b" }}
+                                                style={{ backgroundColor: TIPO_COLORS[item.tipo.toLowerCase()] || "#64748b" }}
                                             >
-                                                {item.tipo.charAt(0) + item.tipo.slice(1).toLowerCase()}
+                                                {TIPO_LABELS[item.tipo.toLowerCase()] || item.tipo}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-grafite/80">{item.secretaria}</td>
+                                        <td className="px-6 py-4 text-text-primary/80">{item.secretaria}</td>
                                         <td className="px-6 py-4">
                                             <span
                                                 className="px-3 py-1 rounded-full text-white text-sm font-semibold flex items-center gap-1 w-fit"
@@ -259,10 +267,10 @@ export function ManifestacoesTab() {
                                         <td className="px-6 py-4 text-center">
                                             <Link
                                                 href={`/transparencia/manifestacoes/${item.protocolo}`}
-                                                className="p-2 hover:bg-slate-100 rounded-lg transition-colors inline-block"
+                                                className="p-2 hover:bg-bg-secondary rounded-lg transition-colors inline-block"
                                                 title="Ver detalhes"
                                             >
-                                                <Eye className="w-5 h-5 text-grafite/60" />
+                                                <Eye className="w-5 h-5 text-text-secondary" />
                                             </Link>
                                         </td>
                                     </motion.tr>
@@ -275,18 +283,18 @@ export function ManifestacoesTab() {
 
             {/* Pagination */}
             {totalPages > 0 && (
-                <div className="bg-white rounded-[24px] shadow-lg p-6 mb-6">
+                <div className="bg-bg-card rounded-[24px] shadow-lg p-6 mb-6 border border-border-color">
                     <div className="flex items-center justify-between">
-                        <p className="text-grafite/60">
-                            Mostrando <span className="font-semibold text-grafite">{start}</span> a{" "}
-                            <span className="font-semibold text-grafite">{end}</span> de{" "}
-                            <span className="font-semibold text-grafite">{total}</span> resultados
+                        <p className="text-text-secondary">
+                            Mostrando <span className="font-semibold text-text-primary">{start}</span> a{" "}
+                            <span className="font-semibold text-text-primary">{end}</span> de{" "}
+                            <span className="font-semibold text-text-primary">{total}</span> resultados
                         </p>
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setPage(Math.max(1, page - 1))}
                                 disabled={page === 1}
-                                className="px-4 py-2 border-2 border-slate-200 rounded-lg font-semibold text-grafite disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                                className="px-4 py-2 border-2 border-border-color rounded-lg font-semibold text-text-primary disabled:opacity-30 hover:bg-bg-secondary transition-colors"
                             >
                                 ‹
                             </button>
@@ -299,23 +307,23 @@ export function ManifestacoesTab() {
                                             onClick={() => setPage(pageNum)}
                                             className={`px-4 py-2 border-2 rounded-lg font-semibold transition-colors ${page === pageNum
                                                 ? "bg-primary text-white border-primary"
-                                                : "border-slate-200 text-grafite hover:bg-slate-50"
+                                                : "border-border-color text-text-primary hover:bg-bg-secondary"
                                                 }`}
                                         >
                                             {pageNum}
                                         </button>
                                     );
                                 } else if (pageNum === 4 && page > 5) {
-                                    return <span key={pageNum} className="px-2 py-2">...</span>;
+                                    return <span key={pageNum} className="px-2 py-2 text-text-secondary">...</span>;
                                 } else if (pageNum === totalPages - 3 && page < totalPages - 4) {
-                                    return <span key={pageNum} className="px-2 py-2">...</span>;
+                                    return <span key={pageNum} className="px-2 py-2 text-text-secondary">...</span>;
                                 }
                                 return null;
                             })}
                             <button
                                 onClick={() => setPage(Math.min(totalPages, page + 1))}
                                 disabled={page === totalPages}
-                                className="px-4 py-2 border-2 border-slate-200 rounded-lg font-semibold text-grafite disabled:opacity-30 hover:bg-slate-50 transition-colors"
+                                className="px-4 py-2 border-2 border-border-color rounded-lg font-semibold text-text-primary disabled:opacity-30 hover:bg-bg-secondary transition-colors"
                             >
                                 ›
                             </button>
