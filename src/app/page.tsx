@@ -1,50 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { Plus, Search, BarChart3, LogOut } from "lucide-react";
-import Image from "next/image";
+import { Plus, Search } from "lucide-react";
 
+import { Navbar } from "@/components/Navbar";
 import { ActionCard } from "@/components/ActionCard";
-import { HeroPanel } from "@/components/HeroPanel";
 
 export default function LandingPage() {
     return (
-        <main className="min-h-screen bg-white flex overflow-hidden">
-            {/* Left Column - Actions (50%) */}
-            <div className="relative w-full lg:w-1/2 flex flex-col justify-between py-12 px-8 lg:px-16 overflow-y-auto bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white to-slate-50">
-                {/* Header Section */}
-                <header className="flex flex-col items-center gap-6 mt-8 relative">
-                    <div className="absolute top-6 right-6 z-10">
-                        <button
-                            onClick={() => {
-                                fetch('/api/auth/signout', { method: 'POST' }).then(() => {
-                                    window.location.href = '/login';
-                                });
-                            }}
-                            className="flex items-center gap-2 text-slate-500 font-medium hover:bg-slate-100 px-4 py-2 rounded-full transition-colors"
-                        >
-                            <LogOut className="w-4 h-4" />
-                            <span>Sair</span>
-                        </button>
-                    </div>
+        <main className="min-h-screen bg-bg-primary flex flex-col transition-colors duration-300">
+            <Navbar />
 
-                    <div className="flex flex-col items-center">
-                        <Image
-                            src="/logo-boituva.png"
-                            alt="Boituva - Construindo progresso de mãos dadas"
-                            width={400}
-                            height={120}
-                            priority
-                            className="h-24 w-auto mb-2"
-                        />
-                        <p className="text-grafite/50 text-sm font-semibold tracking-[0.3em]">OUVIDORIA DIGITAL</p>
-                    </div>
-                    <h2 className="text-3xl font-bold text-grafite mt-2 text-center">Olá! Como podemos ajudar hoje?</h2>
+            {/* Content Section */}
+            <div className="flex-1 flex flex-col items-center justify-center py-12 px-8">
+                {/* Header */}
+                <header className="text-center mb-12">
+                    <h1 className="text-4xl font-bold text-text-primary mb-3">
+                        Olá! Como podemos ajudar hoje?
+                    </h1>
+                    <p className="text-xl text-text-secondary font-medium">
+                        Selecione uma das opções abaixo
+                    </p>
                 </header>
 
                 {/* Action Cards Section */}
-                <section className="flex flex-col gap-5 w-full items-center my-8">
-                    <Link href="/registro/identificacao" className="w-full max-w-xl">
+                <section className="flex flex-col gap-6 w-[80%] max-w-4xl">
+                    <Link href="/registro/identificacao" className="w-full">
                         <ActionCard
                             title="Registrar Nova Manifestação"
                             subtitle="Faça elogios, sugestões ou denúncias"
@@ -52,7 +33,7 @@ export default function LandingPage() {
                             variant="primary"
                         />
                     </Link>
-                    <Link href="/consulta" className="w-full max-w-xl">
+                    <Link href="/consulta" className="w-full">
                         <ActionCard
                             title="Consultar Manifestação"
                             subtitle="Acompanhe o status do seu pedido"
@@ -60,30 +41,17 @@ export default function LandingPage() {
                             variant="grafite"
                         />
                     </Link>
-                    <Link href="/transparencia" className="w-full max-w-xl">
-                        <ActionCard
-                            title="Painel de Transparência"
-                            subtitle="Veja dados e estatísticas das manifestações"
-                            icon={BarChart3}
-                            variant="primary"
-                        />
-                    </Link>
                 </section>
 
                 {/* Footer Section */}
-                <footer className="w-full text-center mb-4">
-                    <div className="flex items-center justify-between text-slate-400 font-medium text-xs px-4">
+                <footer className="mt-auto pt-12 text-center">
+                    <div className="flex items-center justify-center gap-8 text-text-secondary font-medium text-xs">
                         <span>© 2026 Boituva</span>
-                        <div className="flex gap-4">
-                            <span>Privacidade</span>
-                            <span>Termos</span>
-                        </div>
+                        <span>Privacidade</span>
+                        <span>Termos</span>
                     </div>
                 </footer>
             </div>
-
-            {/* Right Column - Image & Overlay (50%) */}
-            <HeroPanel />
         </main>
     );
 }

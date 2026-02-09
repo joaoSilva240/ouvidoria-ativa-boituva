@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Sidebar } from "./Sidebar";
 
 interface NavbarProps {
@@ -16,13 +17,14 @@ interface NavbarProps {
  */
 export function Navbar({ showMenuButton = true }: NavbarProps) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { theme } = useTheme();
 
     return (
         <>
             <header className="w-full flex justify-between items-center py-6 px-12 bg-bg-primary/80 dark:bg-bg-primary/90 backdrop-blur-sm border-b border-border-color relative z-10 transition-colors duration-300">
                 <Link href="/" className="flex items-center">
                     <Image
-                        src="/logo-boituva.png"
+                        src={theme === 'dark' ? "/logo-boituva-dark.png" : "/logo-boituva.png"}
                         alt="Boituva - Ouvidoria Digital"
                         width={200}
                         height={60}
