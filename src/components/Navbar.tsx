@@ -1,46 +1,50 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { useState } from "react";
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Sidebar } from "./Sidebar";
 
 interface NavbarProps {
-    backHref?: string;       // URL de destino do botão voltar (default: "/")
-    backLabel?: string;      // Texto do botão (default: "Voltar")
-    showBackButton?: boolean; // Controle de visibilidade (default: true)
+    showMenuButton?: boolean;
 }
 
 /**
  * Navbar unificada para todas as páginas do projeto.
- * Design: Logo à esquerda + botão "Voltar" à direita.
+ * Design: Logo à esquerda + botão menu à direita que abre Sidebar.
  */
-export function Navbar({
-    backHref = "/",
-    backLabel = "Voltar",
-    showBackButton = true
-}: NavbarProps) {
-    return (
-        <header className="w-full flex justify-between items-center py-6 px-12 bg-white/50 backdrop-blur-sm border-b border-slate-100">
-            <Link href="/" className="flex items-center">
-                <Image
-                    src="/logo-boituva.png"
-                    alt="Boituva - Ouvidoria Digital"
-                    width={200}
-                    height={60}
-                    priority
-                    className="h-12 w-auto"
-                />
-            </Link>
+export function Navbar({ showMenuButton = true }: NavbarProps) {
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-            {showBackButton && (
-                <Link
-                    href={backHref}
-                    className="flex items-center gap-2 px-6 py-2 rounded-full border border-slate-200 text-grafite font-semibold hover:bg-slate-50 transition-colors shadow-sm"
-                >
-                    <ChevronLeft className="w-5 h-5" />
-                    {backLabel}
+    return (
+        <>
+            <header className="w-full flex justify-between items-center py-6 px-12 bg-white/80 backdrop-blur-sm border-b border-slate-100 relative z-10">
+                <Link href="/" className="flex items-center">
+                    <Image
+                        src="/logo-boituva.png"
+                        alt="Boituva - Ouvidoria Digital"
+                        width={200}
+                        height={60}
+                        priority
+                        className="h-12 w-auto"
+                    />
                 </Link>
-            )}
-        </header>
+
+                {showMenuButton && (
+                    <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-slate-200 text-grafite font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+                        aria-label="Abrir menu"
+                    >
+                        <Menu className="w-5 h-5" />
+                        Menu
+                    </button>
+                )}
+            </header>
+
+            <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+        </>
     );
 }
+

@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { BarChart3, MessageSquare, Clock, ThumbsUp } from "lucide-react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { TypeChart } from "@/components/dashboard/TypeChart";
 import { DepartmentChart } from "@/components/dashboard/DepartmentChart";
 import { TimelineChart } from "@/components/dashboard/TimelineChart";
 import { DashboardFilters } from "@/components/dashboard/DashboardFilters";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { getDashboardData, DashboardStats } from "@/app/actions/dashboard";
 
 const filterOptions = [
@@ -18,20 +18,14 @@ const filterOptions = [
 
 export function DashboardTab() {
     const [activeFilter, setActiveFilter] = useState("30dias");
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            const data = await getDashboardData(activeFilter);
-            setStats(data);
-            setLoading(false);
-        }
-        fetchData();
-    }, [activeFilter]);
+    const { data: stats, isLoading } = useQuery<DashboardStats>({
+        queryKey: ['dashboard', activeFilter],
+        queryFn: () => getDashboardData(activeFilter),
+        staleTime: 5 * 60 * 1000, // 5 minutos
+    });
 
-    if (loading || !stats) {
+    if (isLoading || !stats) {
         return (
             <div className="flex items-center justify-center py-20">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-4 border-primary"></div>
@@ -95,3 +89,4 @@ export function DashboardTab() {
         </>
     );
 }
+

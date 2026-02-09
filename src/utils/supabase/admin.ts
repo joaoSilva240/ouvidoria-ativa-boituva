@@ -17,8 +17,6 @@ if (!serviceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not defined. Please add it to your environment variables.");
 }
 
-console.log("[adminClient] Criando cliente admin com URL:", supabaseUrl.substring(0, 30) + "...");
-
 export const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: {
         autoRefreshToken: false,

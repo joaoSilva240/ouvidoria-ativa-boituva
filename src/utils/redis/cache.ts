@@ -42,16 +42,12 @@ export async function getOrSet<T>(
         const cached = await redis.get(fullKey);
 
         if (cached) {
-            // console.log(`[Cache] HIT: ${fullKey}`);
             try {
                 return JSON.parse(cached) as T;
             } catch (e) {
                 console.error(`[Cache] Erro de parse JSON para chave ${fullKey}`, e);
-                // Se o JSON estiver corrompido, busca dados novos
             }
         }
-
-        // console.log(`[Cache] MISS: ${fullKey}`);
 
         // Executar fallback
         const freshData = await fallback();
@@ -83,7 +79,6 @@ export async function invalidateCache(key: string, prefix = DEFAULT_PREFIX): Pro
         if (!redis || !redis.isOpen) return;
 
         await redis.del(fullKey);
-        console.log(`[Cache] Invalidado: ${fullKey}`);
     } catch (error) {
         console.error(`[Cache] Erro ao invalidar ${fullKey}:`, error);
     }
@@ -106,7 +101,6 @@ export async function invalidatePattern(pattern: string, prefix = DEFAULT_PREFIX
 
         if (keys.length > 0) {
             await redis.del(keys);
-            console.log(`[Cache] Pattern invalidado: ${fullPattern} (${keys.length} chaves removidas)`);
         }
     } catch (error) {
         console.error(`[Cache] Erro ao invalidar padrão ${fullPattern}:`, error);

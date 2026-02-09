@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search, Download, Eye } from "lucide-react";
 import { getManifestacoes, getSecretarias, ManifestacaoListItem } from "@/app/actions/manifestacoes";
 import Link from "next/link";
@@ -65,11 +66,7 @@ function formatDate(dateStr: string): string {
 }
 
 export function ManifestacoesTab() {
-    const [manifestacoes, setManifestacoes] = useState<ManifestacaoListItem[]>([]);
-    const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(0);
-    const [loading, setLoading] = useState(true);
 
     // Filters
     const [search, setSearch] = useState("");
@@ -78,38 +75,23 @@ export function ManifestacoesTab() {
     const [identidade, setIdentidade] = useState("TODOS");
     const [periodo, setPeriodo] = useState("30DIAS");
 
-    // Available secretarias
-    const [secretarias, setSecretarias] = useState<string[]>([]);
+    // Query para secretarias
+    const { data: secretarias = [] } = useQuery({
+        queryKey: ['secretarias'],
+        queryFn: getSecretarias,
+        staleTime: 10 * 60 * 1000, // 10 minutos
+    });
 
-    useEffect(() => {
-        async function loadSecretarias() {
-            const secs = await getSecretarias();
-            setSecretarias(secs);
-        }
-        loadSecretarias();
-    }, []);
+    // Query para manifestações
+    const { data: result, isLoading: loading } = useQuery({
+        queryKey: ['manifestacoes', search, tipo, secretaria, identidade, periodo, page],
+        queryFn: () => getManifestacoes({ search, tipo, secretaria, identidade, periodo }, page, 10),
+        staleTime: 2 * 60 * 1000, // 2 minutos
+    });
 
-    useEffect(() => {
-        async function loadData() {
-            setLoading(true);
-            const result = await getManifestacoes(
-                {
-                    search,
-                    tipo,
-                    secretaria,
-                    identidade,
-                    periodo,
-                },
-                page,
-                10
-            );
-            setManifestacoes(result.data);
-            setTotal(result.total);
-            setTotalPages(result.totalPages);
-            setLoading(false);
-        }
-        loadData();
-    }, [search, tipo, secretaria, identidade, periodo, page]);
+    const manifestacoes = result?.data ?? [];
+    const total = result?.total ?? 0;
+    const totalPages = result?.totalPages ?? 0;
 
     const perPage = 10;
     const start = (page - 1) * perPage + 1;

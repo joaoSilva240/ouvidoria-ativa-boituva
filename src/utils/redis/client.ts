@@ -57,7 +57,7 @@ export async function getRedisClient() {
         });
 
         client.on("connect", () => {
-            console.log("[Redis] Conectado com sucesso!");
+            // Conexão estabelecida
         });
 
         await client.connect();
@@ -91,7 +91,6 @@ export async function closeRedisConnection() {
             if (process.env.NODE_ENV !== "production") {
                 globalThis.redisGlobal = undefined;
             }
-            console.log("[Redis] Conexão encerrada.");
         }
     }
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { User, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Stepper } from "@/components/wizard/Stepper";
@@ -17,35 +18,31 @@ interface UserProfile {
     telefone: string;
 }
 
+async function fetchUserProfile(): Promise<UserProfile | null> {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return null;
+
+    const { data: profileData } = await supabase
+        .from("profiles")
+        .select("nome, cpf, email, telefone")
+        .eq("id", user.id)
+        .single();
+
+    return profileData;
+}
+
 export default function IdentificacaoPage() {
     const { data, setIdentificacao } = useManifestacao();
     const [mode, setMode] = useState<"identificado" | "anonimo">(data.identificacao.mode);
-    const [profile, setProfile] = useState<UserProfile | null>(null);
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    // Buscar dados do perfil do usuário logado
-    useEffect(() => {
-        async function fetchProfile() {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (user) {
-                const { data: profileData } = await supabase
-                    .from("profiles")
-                    .select("nome, cpf, email, telefone")
-                    .eq("id", user.id)
-                    .single();
-
-                if (profileData) {
-                    setProfile(profileData);
-                }
-            }
-            setLoading(false);
-        }
-
-        fetchProfile();
-    }, []);
+    const { data: profile, isLoading: loading } = useQuery({
+        queryKey: ['user-profile'],
+        queryFn: fetchUserProfile,
+        staleTime: 5 * 60 * 1000, // 5 minutos
+    });
 
     const handleContinue = () => {
         if (mode === "identificado" && profile) {
