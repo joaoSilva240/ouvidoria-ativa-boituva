@@ -11,6 +11,7 @@ import { Navbar } from "@/components/Navbar";
 import { getManifestacaoByProtocolo, updateManifestacaoStatus, sendManifestacaoResponse } from "@/app/actions/manifestacoes";
 import { ChatMensagens } from "@/components/ChatMensagens";
 import { getMensagens, enviarMensagemOuvidor, finalizarManifestacaoOuvidor, TipoMensagem } from "@/app/actions/mensagens";
+import { useHistory } from "@/contexts/HistoryContext";
 
 /* --------------------------------------------------------------------------------
    Constants & Colors
@@ -67,6 +68,7 @@ export default function ManifestacaoDetailsPage() {
     const params = useParams();
     const router = useRouter();
     const queryClient = useQueryClient();
+    const { addToHistory } = useHistory();
     const protocoloParam = params.protocolo as string;
 
     const [status, setStatus] = useState("");
@@ -97,6 +99,13 @@ export default function ManifestacaoDetailsPage() {
             setStatus(manifestacao.status);
         }
     }, [manifestacao?.status]);
+
+    // Adicionar ao histórico apenas uma vez por protocolo
+    useEffect(() => {
+        if (manifestacao?.tipo && protocoloParam) {
+            addToHistory(protocoloParam, manifestacao.tipo);
+        }
+    }, [protocoloParam]); // Apenas quando protocolo mudar
 
     /* --------------------------------------------------------------------------------
        Handlers
@@ -158,7 +167,7 @@ export default function ManifestacaoDetailsPage() {
 
     return (
         <main className="min-h-screen bg-slate-50">
-            <Navbar backHref="/transparencia" />
+            <Navbar />
 
             <div className="max-w-7xl mx-auto py-8 px-4 lg:px-8">
 
