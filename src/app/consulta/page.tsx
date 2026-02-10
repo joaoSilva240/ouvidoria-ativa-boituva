@@ -228,7 +228,7 @@ export default function ConsultaPage() {
                 {/* Split View Container */}
                 <div className="flex-1 flex flex-col lg:flex-row gap-6 pb-8">
                     {/* Coluna Esquerda - Lista */}
-                    <div className="w-full lg:w-1/2 flex flex-col">
+                    <div className="w-full lg:w-1/4 flex flex-col">
                         {/* Barra de Pesquisa Compacta */}
                         <motion.form
                             initial={{ opacity: 0, y: 10 }}
@@ -306,7 +306,7 @@ export default function ConsultaPage() {
                     </div>
 
                     {/* Coluna Direita - Detalhes */}
-                    <div className="w-full lg:w-1/2">
+                    <div className="w-full lg:w-3/4">
                         <AnimatePresence mode="wait">
                             {result ? (
                                 <motion.div

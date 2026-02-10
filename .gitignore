@@ -50,3 +50,8 @@ To-do.md
 test-*.mjs
 verify-*.mjs
 *.test.local.*
+
+# Migration scripts and schema dumps
+fix-pos-migracao.sql
+schema_origem.sql
+dados_origem.sql

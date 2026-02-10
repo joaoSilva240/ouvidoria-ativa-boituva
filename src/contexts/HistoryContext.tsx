@@ -17,14 +17,27 @@ interface HistoryContextType {
 const HistoryContext = createContext<HistoryContextType | undefined>(undefined);
 
 const STORAGE_KEY = "ouvidoria-history";
+const STORAGE_VERSION_KEY = "ouvidoria-history-version";
+const CURRENT_VERSION = "2"; // Incrementar a cada migração para limpar dados stale
 const MAX_ITEMS = 10;
 
 export function HistoryProvider({ children }: { children: ReactNode }) {
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [mounted, setMounted] = useState(false);
 
-    // Carregar histórico do localStorage
+    // Carregar histórico do localStorage (com verificação de versão)
     useEffect(() => {
+        const storedVersion = localStorage.getItem(STORAGE_VERSION_KEY);
+
+        // Se a versão mudou (migração), limpar histórico antigo
+        if (storedVersion !== CURRENT_VERSION) {
+            localStorage.removeItem(STORAGE_KEY);
+            localStorage.setItem(STORAGE_VERSION_KEY, CURRENT_VERSION);
+            setHistory([]);
+            setMounted(true);
+            return;
+        }
+
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
             try {
