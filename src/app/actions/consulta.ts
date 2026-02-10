@@ -85,6 +85,62 @@ export async function getManifestacaoByProtocol(protocolo: string) {
     }
 }
 
+export interface MinhaManifestacao {
+    id: string;
+    protocolo: string;
+    tipo: string;
+    status: string;
+    created_at: string;
+    updated_at: string;
+    secretaria: string;
+}
+
+/**
+ * Busca todas as manifestações do cidadão logado.
+ * Utiliza cache Redis por 5 minutos.
+ */
+export async function getMinhasManifestacoesAction(): Promise<{
+    success: boolean;
+    data?: MinhaManifestacao[];
+    error?: string;
+}> {
+    const supabase = await createClient();
+
+    // Verificar autenticação
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+        return { success: false, error: "Usuário não autenticado." };
+    }
+
+    const cacheKey = `minhas-manifestacoes:${user.id}`;
+
+    try {
+        const data = await getOrSet(
+            cacheKey,
+            async () => {
+                const { data: manifestacoes, error } = await supabase
+                    .from("manifestacoes")
+                    .select("id, protocolo, tipo, status, created_at, updated_at, secretaria")
+                    .eq("user_id", user.id)
+                    .order("created_at", { ascending: false });
+
+                if (error) {
+                    throw error;
+                }
+
+                return manifestacoes || [];
+            },
+            { ttl: MANIFESTACAO_CACHE_TTL }
+        );
+
+        return { success: true, data: data as MinhaManifestacao[] };
+    } catch (e: any) {
+        console.error("Erro ao buscar manifestações do cidadão:", e);
+        return { success: false, error: "Erro ao buscar suas manifestações." };
+    }
+}
+
 export async function saveSatisfacaoResposta(protocolo: string, satisfacao: string) {
     const supabase = await createClient();
     const normalizedProtocolo = protocolo.trim().toUpperCase();
