@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
+import { SiteFooter } from "@/components/SiteFooter";
 import { ManifestacaoListItem } from "@/components/ManifestacaoListItem";
 import { Search, Loader2, ArrowRight, AlertCircle, Calendar, Megaphone, Building2, Clock, CheckCircle, FileText, Inbox } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +18,7 @@ const TIPO_LABELS: Record<string, string> = {
     "SUGESTAO": "Sugestão",
     "RECLAMACAO": "Reclamação",
     "DENUNCIA": "Denúncia",
-    "INFORMACAO": "Informação",
+    "INFORMACAO": "Solicitação",
     "OUTROS": "Outros",
 };
 
@@ -464,6 +465,8 @@ export default function ConsultaPage() {
                     </div>
                 </div>
             </main>
+
+            <SiteFooter />
         </div>
     );
 }

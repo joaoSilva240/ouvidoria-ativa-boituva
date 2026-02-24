@@ -13,7 +13,7 @@ const categories = [
     { id: "sugestao", label: "Sugestão", icon: Lightbulb, color: "#F59E0B" }, // Amarelo Aventura
     { id: "reclamacao", label: "Reclamação", icon: Megaphone, color: "#F97316" }, // Laranja
     { id: "denuncia", label: "Denúncia", icon: Gavel, color: "#334155" }, // Grafite
-    { id: "informacao", label: "Informação", icon: Info, color: "#0EA5E9" }, // Azul Céu
+    { id: "informacao", label: "Solicitação", icon: Info, color: "#0EA5E9" }, // Azul Céu
 ];
 
 export default function CategoriaPage() {

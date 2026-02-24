@@ -39,7 +39,7 @@ export default function FinalizarPage() {
             sugestao: { label: "Sugestão", color: "text-amarelo-aventura bg-amarelo-aventura/5" },
             reclamacao: { label: "Reclamação", color: "text-orange-500 bg-orange-500/5" },
             denuncia: { label: "Denúncia", color: "text-slate-700 bg-slate-700/5" },
-            informacao: { label: "Informação", color: "text-sky-500 bg-sky-500/5" },
+            informacao: { label: "Solicitação", color: "text-sky-500 bg-sky-500/5" },
         };
         return categories[id as keyof typeof categories] || { label: "Não selecionado", color: "text-primary bg-primary/10" };
     };

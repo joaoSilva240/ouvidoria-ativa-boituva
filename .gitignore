@@ -55,3 +55,6 @@ verify-*.mjs
 fix-pos-migracao.sql
 schema_origem.sql
 dados_origem.sql
+
+# Protótipos locais
+tela_termos.pen

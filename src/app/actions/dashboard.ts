@@ -70,7 +70,7 @@ export async function getDashboardData(periodo: string): Promise<DashboardStats>
             "sugestao": "Sugestão",
             "reclamacao": "Reclamação",
             "denuncia": "Denúncia",
-            "informacao": "Informação",
+            "informacao": "Solicitação",
         };
 
         const distribuicaoPorTipo = Object.entries(tipoCounts).map(([tipo, count]) => ({

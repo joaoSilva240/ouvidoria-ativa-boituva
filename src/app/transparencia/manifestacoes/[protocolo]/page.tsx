@@ -30,7 +30,7 @@ const TIPO_LABELS: Record<string, string> = {
     "SUGESTAO": "Sugestão",
     "RECLAMACAO": "Reclamação",
     "DENUNCIA": "Denúncia",
-    "INFORMACAO": "Informação",
+    "INFORMACAO": "Solicitação",
     "OUTROS": "Outros",
 };
 

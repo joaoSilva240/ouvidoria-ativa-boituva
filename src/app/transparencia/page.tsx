@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BarChart3, ClipboardList } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { SiteFooter } from "@/components/SiteFooter";
 import { DashboardTab } from "./components/DashboardTab";
 import { ManifestacoesTab } from "./components/ManifestacoesTab";
 
@@ -34,31 +35,35 @@ export default function TransparenciaPage() {
     const [activeTab, setActiveTab] = useState<Tab>("dashboard");
 
     return (
-        <main className="min-h-screen bg-bg-primary transition-colors duration-300">
+        <main className="min-h-screen bg-bg-primary transition-colors duration-300 flex flex-col">
             <Navbar />
 
-            {/* Tab Navigation */}
-            <div className="max-w-7xl mx-auto px-6 pt-6">
-                <div className="flex gap-2 bg-bg-card rounded-2xl p-2 shadow-sm border border-border-color w-fit">
-                    <TabButton
-                        active={activeTab === "dashboard"}
-                        onClick={() => setActiveTab("dashboard")}
-                        icon={<BarChart3 className="w-5 h-5" />}
-                    >
-                        Dashboard
-                    </TabButton>
-                    <TabButton
-                        active={activeTab === "manifestacoes"}
-                        onClick={() => setActiveTab("manifestacoes")}
-                        icon={<ClipboardList className="w-5 h-5" />}
-                    >
-                        Manifestações
-                    </TabButton>
+            <div className="flex-1">
+                {/* Tab Navigation */}
+                <div className="max-w-7xl mx-auto px-6 pt-6">
+                    <div className="flex gap-2 bg-bg-card rounded-2xl p-2 shadow-sm border border-border-color w-fit">
+                        <TabButton
+                            active={activeTab === "dashboard"}
+                            onClick={() => setActiveTab("dashboard")}
+                            icon={<BarChart3 className="w-5 h-5" />}
+                        >
+                            Dashboard
+                        </TabButton>
+                        <TabButton
+                            active={activeTab === "manifestacoes"}
+                            onClick={() => setActiveTab("manifestacoes")}
+                            icon={<ClipboardList className="w-5 h-5" />}
+                        >
+                            Manifestações
+                        </TabButton>
+                    </div>
                 </div>
+
+                {/* Tab Content */}
+                {activeTab === "dashboard" ? <DashboardTab /> : <ManifestacoesTab />}
             </div>
 
-            {/* Tab Content */}
-            {activeTab === "dashboard" ? <DashboardTab /> : <ManifestacoesTab />}
+            <SiteFooter />
         </main>
     );
 }

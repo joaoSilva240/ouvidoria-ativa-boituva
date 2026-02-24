@@ -5,6 +5,7 @@ import { Plus, Search } from "lucide-react";
 
 import { Navbar } from "@/components/Navbar";
 import { ActionCard } from "@/components/ActionCard";
+import { SiteFooter } from "@/components/SiteFooter";
 
 export default function LandingPage() {
     return (
@@ -43,15 +44,9 @@ export default function LandingPage() {
                     </Link>
                 </section>
 
-                {/* Footer Section */}
-                <footer className="mt-auto pt-12 text-center">
-                    <div className="flex items-center justify-center gap-8 text-text-secondary font-medium text-xs">
-                        <span>© 2026 Boituva</span>
-                        <span>Privacidade</span>
-                        <span>Termos</span>
-                    </div>
-                </footer>
             </div>
+
+            <SiteFooter />
         </main>
     );
 }

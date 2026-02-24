@@ -13,7 +13,7 @@ const TIPO_OPTIONS = [
     { value: "SUGESTAO", label: "Sugestão" },
     { value: "RECLAMACAO", label: "Reclamação" },
     { value: "DENUNCIA", label: "Denúncia" },
-    { value: "INFORMACAO", label: "Informação" },
+    { value: "INFORMACAO", label: "Solicitação" },
 ];
 
 const IDENTIDADE_OPTIONS = [
@@ -42,7 +42,7 @@ const TIPO_LABELS: Record<string, string> = {
     "sugestao": "Sugestão",
     "reclamacao": "Reclamação",
     "denuncia": "Denúncia",
-    "informacao": "Informação",
+    "informacao": "Solicitação",
 };
 
 const STATUS_COLORS: Record<string, string> = {
