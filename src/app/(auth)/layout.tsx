@@ -27,11 +27,11 @@ export default function AuthLayout({
                     {children}
                 </main>
 
-                <footer className="mt-12 flex justify-between text-xs text-slate-400">
+                <footer className="mt-12 flex flex-col items-center justify-between text-xs text-slate-400 sm:flex-row sm:items-center">
                     <span>© 2026 Boituva</span>
                     <div className="flex gap-4">
-                        <Link href="#" className="hover:text-primary">Privacidade</Link>
-                        <Link href="#" className="hover:text-primary">Termos</Link>
+                        <Link href="/privacidade" className="hover:text-primary transition-colors">Privacidade</Link>
+                        <Link href="/termos" className="hover:text-primary transition-colors">Termos</Link>
                     </div>
                 </footer>
             </div>
